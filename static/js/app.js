@@ -382,20 +382,21 @@ function setLayout(layout) {
         tempDiv.innerHTML = originalHTML;
 
         // HAT layout: 4 rows × 8 columns (GND pins not shown on HAT)
-        // Top-left is 3.3V, bottom-right is GPIO26
-        // Row 1: +3V3, +3V3, +5V, +5V, IO17, TXD, IO23, SDA
-        // Row 2: IO18, RXD, IO22, IO4, MOSI, IO24, IDSD, IO27
-        // Row 3: SCLK, IO5, IO12, IO13, MISO, IO25, IDSC, IO21
-        // Row 4: CE1, IO16, IO19, IO26, CE0, IO6, (skip), (skip)
+        // Reading left to right from the physical HAT
+        // Note: Some pins can be GPIO or peripherals (TXD=GPIO14, RXD=GPIO15, MOSI=GPIO10, etc)
+        // Row 1: +3V3, IO17, IO18, MOSI(IO10), MISO(IO9), SCLK(IO11), CE0(IO8), CE1(IO7)
+        // Row 2: +3V3, IO8(MOSI_SCLK_CE0), IO24, IO25, IO5, IO6, IO16, IO26
+        // Row 3: TXD(IO14), RXD(IO15), IO22, IDSD, IDSC, IO12, IO20, IO19
+        // Row 4: +5V, +5V, SDA(IO2), IO23, IO4, IO27, IO21, IO13
         const hatLayout = [
-            // Row 1: 3.3V(1), 3.3V(17), 5V(2), 5V(4), IO17(11), TXD(8), IO23(16), SDA(3)
-            [1, 17, 2, 4, 11, 8, 16, 3],
-            // Row 2: IO18(12), RXD(10), IO22(15), IO4(7), MOSI(19), IO24(18), IDSD(27), IO27(13)
-            [12, 10, 15, 7, 19, 18, 27, 13],
-            // Row 3: SCLK(23), IO5(29), IO12(32), IO13(33), MISO(21), IO25(22), IDSC(28), IO21(40)
-            [23, 29, 32, 33, 21, 22, 28, 40],
-            // Row 4: CE1(26), IO16(36), IO19(35), IO26(37), CE0(24), IO6(31)
-            [26, 36, 35, 37, 24, 31]
+            // Row 1: 3V3(1 or 17), IO17(11), IO18(12), MOSI/IO10(19), MISO/IO9(21), SCLK/IO11(23), CE0/IO8(24), CE1/IO7(26)
+            [17, 11, 12, 19, 21, 23, 24, 26],
+            // Row 2: 3V3(1), IO8(?), IO24(18), IO25(22), IO5(29), IO6(31), IO16(36), IO26(37)
+            [1, 8, 18, 22, 29, 31, 36, 37],
+            // Row 3: TXD/IO14(8), RXD/IO15(10), IO22(15), IDSD(27), IDSC(28), IO12(32), IO20(38), IO19(35)
+            [8, 10, 15, 27, 28, 32, 38, 35],
+            // Row 4: 5V(2), 5V(4), SDA/IO2(3), IO23(16), IO4(7), IO27(13), IO21(40), IO13(33)
+            [2, 4, 3, 16, 7, 13, 40, 33]
         ];
 
         for (let row = 0; row < hatLayout.length; row++) {
