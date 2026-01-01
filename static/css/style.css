@@ -617,12 +617,14 @@ body.peripheral-tool-active .pin-indicator {
 
     /* Hat mode: reduce size and center */
     .pin-row.layout-hat {
-        transform: scale(0.85);
+        transform: scale(0.75);
         transform-origin: center center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        width: 100%;
+    }
+
+    .pin-row.layout-hat .pin-row-hat {
         justify-content: center;
+        width: 100%;
     }
 
     .layout-toggle {
