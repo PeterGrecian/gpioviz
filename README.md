@@ -22,22 +22,39 @@ A Python Flask web application for visualizing, configuring, and controlling all
 
 1. Clone or navigate to this directory:
 ```bash
-cd /home/peter/gpioviz
+cd gpioviz
 ```
 
-2. Install dependencies:
+2. Create a virtual environment:
+```bash
+python3 -m venv venv
+```
+
+3. Activate the virtual environment:
+```bash
+source venv/bin/activate
+```
+
+4. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-Or install manually:
+**Alternative (system-wide installation):**
 ```bash
-pip install Flask RPi.GPIO
+sudo apt-get install -y python3-flask python3-rpi.gpio
 ```
 
 ## Running the Application
 
 1. Start the server (requires sudo for GPIO access):
+
+**If using virtual environment:**
+```bash
+sudo venv/bin/python3 app.py
+```
+
+**If using system packages:**
 ```bash
 sudo python3 app.py
 ```

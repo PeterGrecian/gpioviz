@@ -45,14 +45,22 @@ GPIO_PINS = {
     40: 'GPIO21'
 }
 
-# Initialize all GPIO pins as outputs
+# Initialize pin states (setup pins lazily on first use)
 for pin in GPIO_PINS.keys():
-    GPIO.setup(pin, GPIO.OUT)
-    GPIO.output(pin, GPIO.LOW)
     pin_states[pin] = {'mode': 'OUT', 'state': 0, 'flashing': False, 'flash_speed': 500}
+
+def ensure_pin_setup(pin, mode='OUT'):
+    """Ensure a pin is properly set up before use"""
+    try:
+        GPIO.setup(pin, GPIO.OUT if mode == 'OUT' else GPIO.IN)
+        if mode == 'OUT':
+            GPIO.output(pin, GPIO.LOW)
+    except Exception as e:
+        print(f"Warning: Could not setup pin {pin}: {e}")
 
 def flash_pin(pin, speed_ms):
     """Flash a pin at specified speed"""
+    ensure_pin_setup(pin, 'OUT')
     while flashing_pins.get(pin, False):
         GPIO.output(pin, GPIO.HIGH)
         pin_states[pin]['state'] = 1
@@ -89,6 +97,7 @@ def set_pin(pin):
             flash_threads[pin].join()
         pin_states[pin]['flashing'] = False
 
+    ensure_pin_setup(pin, 'OUT')
     GPIO.output(pin, GPIO.HIGH if state else GPIO.LOW)
     pin_states[pin]['state'] = state
 
@@ -137,6 +146,7 @@ def toggle_flash(pin):
     if flash_enabled:
         # Start flashing
         if not pin_states[pin]['flashing']:
+            ensure_pin_setup(pin, 'OUT')
             pin_states[pin]['flashing'] = True
             flashing_pins[pin] = True
             thread = threading.Thread(target=flash_pin, args=(pin, speed))
@@ -150,6 +160,7 @@ def toggle_flash(pin):
             if pin in flash_threads:
                 flash_threads[pin].join()
             pin_states[pin]['flashing'] = False
+            ensure_pin_setup(pin, 'OUT')
             GPIO.output(pin, GPIO.LOW)
             pin_states[pin]['state'] = 0
 
@@ -178,7 +189,7 @@ def reset_all():
             if pin in flash_threads:
                 flash_threads[pin].join()
 
-        GPIO.setup(pin, GPIO.OUT)
+        ensure_pin_setup(pin, 'OUT')
         GPIO.output(pin, GPIO.LOW)
         pin_states[pin] = {'mode': 'OUT', 'state': 0, 'flashing': False, 'flash_speed': 500}
 
