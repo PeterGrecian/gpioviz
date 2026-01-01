@@ -597,20 +597,32 @@ body.peripheral-tool-active .pin-indicator {
         min-width: 100px;
     }
 
-    /* Header mode: stack columns vertically on mobile */
+    /* Header mode: keep 2 columns on mobile */
     .pin-row.layout-header {
-        flex-direction: column;
+        flex-direction: row;
         gap: 8px;
+        justify-content: center;
     }
 
     .pin-row.layout-header .pin {
-        min-width: 100%;
+        min-width: 120px;
+        font-size: 9px;
+    }
+
+    .pin-row.layout-header .pin-label {
+        font-size: 9px;
+    }
+
+    .pin-row.layout-header .pin-number {
+        font-size: 9px;
     }
 
     /* Hat mode: reduce size to fit mobile screens */
     .pin-row.layout-hat {
         transform: scale(0.85);
         transform-origin: top center;
+        margin: 0 auto;
+        width: fit-content;
     }
 
     .pin-row.layout-hat .pin {
