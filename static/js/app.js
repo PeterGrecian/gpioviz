@@ -71,6 +71,10 @@ function initializeEventListeners() {
     // All input button
     document.getElementById('all-input').addEventListener('click', setAllInput);
 
+    // Save/Load config buttons
+    document.getElementById('save-config').addEventListener('click', saveConfiguration);
+    document.getElementById('load-config').addEventListener('click', loadConfiguration);
+
     // Layout toggle buttons
     document.getElementById('btn-hat-mode').addEventListener('click', () => setLayout('hat'));
     document.getElementById('btn-header-mode').addEventListener('click', () => setLayout('header'));
@@ -635,5 +639,69 @@ async function resetAll() {
         } catch (error) {
             console.error('Error resetting pins:', error);
         }
+    }
+}
+
+async function saveConfiguration() {
+    const filename = prompt('Enter configuration filename:', 'config.yaml');
+    if (!filename) return;
+
+    // Ensure .yaml extension
+    const finalFilename = filename.endsWith('.yaml') || filename.endsWith('.yml') ? filename : filename + '.yaml';
+
+    try {
+        const response = await fetch('/api/config/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ filename: finalFilename })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            alert(`Configuration saved to ${data.filepath}`);
+        } else {
+            alert(`Error saving configuration: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error saving configuration:', error);
+        alert('Error saving configuration');
+    }
+}
+
+async function loadConfiguration() {
+    try {
+        // Get list of available configurations
+        const listResponse = await fetch('/api/config/list');
+        const listData = await listResponse.json();
+
+        if (listData.configs.length === 0) {
+            alert('No saved configurations found');
+            return;
+        }
+
+        const configList = listData.configs.join('\n');
+        const filename = prompt(`Available configurations:\n${configList}\n\nEnter filename to load:`, listData.configs[0] || 'config.yaml');
+        if (!filename) return;
+
+        const response = await fetch('/api/config/load', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ filename: filename })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            await loadPinStates();
+            alert(`Configuration loaded from ${filename}`);
+        } else {
+            alert(`Error loading configuration: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error loading configuration:', error);
+        alert('Error loading configuration');
     }
 }

@@ -5,6 +5,9 @@ import time
 import sys
 import subprocess
 from datetime import datetime
+import yaml
+import os
+import argparse
 
 app = Flask(__name__)
 app.logger.disabled = True  # Disable Flask's request logging
@@ -356,6 +359,101 @@ def get_version():
     except Exception as e:
         return jsonify({'commit_hash': 'unknown'})
 
+@app.route('/api/config/save', methods=['POST'])
+def api_save_config():
+    """API endpoint to save configuration"""
+    data = request.json or {}
+    filename = data.get('filename', 'config.yaml')
+
+    try:
+        filepath = save_configuration(filename)
+        return jsonify({'success': True, 'filepath': filepath})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/config/load', methods=['POST'])
+def api_load_config():
+    """API endpoint to load configuration"""
+    data = request.json or {}
+    filename = data.get('filename', 'config.yaml')
+
+    try:
+        success = load_configuration(filename)
+        return jsonify({'success': success})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/config/list', methods=['GET'])
+def api_list_configs():
+    """API endpoint to list available configurations"""
+    config_dir = 'configs'
+    if not os.path.exists(config_dir):
+        return jsonify({'configs': []})
+
+    configs = [f for f in os.listdir(config_dir) if f.endswith('.yaml') or f.endswith('.yml')]
+    return jsonify({'configs': configs})
+
+def save_configuration(filename='config.yaml'):
+    """Save current pin configuration to YAML file"""
+    config = {
+        'pins': {}
+    }
+
+    for pin, state in pin_states.items():
+        config['pins'][pin] = {
+            'mode': state['mode'],
+            'state': state['state'],
+            'peripheral_mode': state.get('peripheral_mode', 'GPIO'),
+            'flash_speed': state.get('flash_speed', 500)
+        }
+
+    config_dir = 'configs'
+    os.makedirs(config_dir, exist_ok=True)
+    filepath = os.path.join(config_dir, filename)
+
+    with open(filepath, 'w') as f:
+        yaml.dump(config, f, default_flow_style=False)
+
+    print(f"Configuration saved to {filepath}")
+    return filepath
+
+def load_configuration(filename='config.yaml'):
+    """Load pin configuration from YAML file"""
+    config_dir = 'configs'
+    filepath = os.path.join(config_dir, filename)
+
+    if not os.path.exists(filepath):
+        print(f"Configuration file not found: {filepath}")
+        return False
+
+    with open(filepath, 'r') as f:
+        config = yaml.safe_load(f)
+
+    if 'pins' not in config:
+        print("Invalid configuration file format")
+        return False
+
+    # Apply configuration
+    for pin, settings in config['pins'].items():
+        pin = int(pin)
+        if pin in GPIO_PINS:
+            # Set mode
+            mode = settings.get('mode', 'OUT')
+            if mode == 'OUT':
+                ensure_pin_setup(pin, 'OUT')
+                GPIO.output(pin, GPIO.HIGH if settings.get('state', 0) else GPIO.LOW)
+            else:
+                GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+            # Update state
+            pin_states[pin]['mode'] = mode
+            pin_states[pin]['state'] = settings.get('state', 0)
+            pin_states[pin]['peripheral_mode'] = settings.get('peripheral_mode', 'GPIO')
+            pin_states[pin]['flash_speed'] = settings.get('flash_speed', 500)
+
+    print(f"Configuration loaded from {filepath}")
+    return True
+
 def cleanup():
     """Cleanup GPIO on exit"""
     for pin in flashing_pins.keys():
@@ -365,19 +463,32 @@ def cleanup():
 if __name__ == '__main__':
     import logging
 
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Raspberry Pi GPIO Visualizer')
+    parser.add_argument('--load-config', type=str, help='Load configuration from YAML file on startup')
+    parser.add_argument('--port', type=int, default=5000, help='Port to run the web server on (default: 5000)')
+    args = parser.parse_args()
+
     # Disable werkzeug logging
     log = logging.getLogger('werkzeug')
     log.setLevel(logging.ERROR)
 
+    # Load configuration if specified
+    if args.load_config:
+        print(f"Loading configuration: {args.load_config}")
+        load_configuration(args.load_config)
+
     try:
         print("\n" + "="*70)
         print("  Raspberry Pi GPIO Visualizer")
-        print("  http://0.0.0.0:5000")
+        print(f"  http://0.0.0.0:{args.port}")
+        if args.load_config:
+            print(f"  Loaded config: {args.load_config}")
         print("="*70 + "\n")
         sys.stderr.write("\n")  # Add newline before status starts
         sys.stderr.flush()
         update_status_line()  # Show "ready" message
-        app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
+        app.run(host='0.0.0.0', port=args.port, debug=False, use_reloader=False)
     except KeyboardInterrupt:
         print("\n\nShutting down...")
         cleanup()
