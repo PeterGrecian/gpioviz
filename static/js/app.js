@@ -399,22 +399,17 @@ function setLayout(layout) {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = originalHTML;
 
-        // HAT layout: 4 rows × 8 columns (GND pins not shown on HAT)
-        // Reading left to right from the physical HAT
-        // Note: Some pins can be GPIO or peripherals (TXD=GPIO14, RXD=GPIO15, MOSI=GPIO10, etc)
-        // Row 1: +3V3, IO17, IO18, MOSI(IO10), MISO(IO9), SCLK(IO11), CE0(IO8), CE1(IO7)
-        // Row 2: +3V3, IO8(MOSI_SCLK_CE0), IO24, IO25, IO5, IO6, IO16, IO26
-        // Row 3: TXD(IO14), RXD(IO15), IO22, IDSD, IDSC, IO12, IO20, IO19
-        // Row 4: +5V, +5V, SDA(IO2), IO23, IO4, IO27, IO21, IO13
+        // HAT layout: 4 rows × 8 columns (verified with physical HAT)
+        // All rows VERIFIED CORRECT against physical LED positions
         const hatLayout = [
-            // Row 1: 3V3(1 or 17), IO17(11), IO18(12), MOSI/IO10(19), MISO/IO9(21), SCLK/IO11(23), CE0/IO8(24), CE1/IO7(26)
+            // Row 1: 3V3(17), IO17(11), IO18(12), MOSI(19), MISO(21), SCLK(23), CE0(24), CE1(26)
             [17, 11, 12, 19, 21, 23, 24, 26],
-            // Row 2: 3V3(1), IO8(?), IO24(18), IO25(22), IO5(29), IO6(31), IO16(36), IO26(37)
-            [1, 8, 18, 22, 29, 31, 36, 37],
-            // Row 3: TXD/IO14(8), RXD/IO15(10), IO22(15), IDSD(27), IDSC(28), IO12(32), IO20(38), IO19(35)
-            [8, 10, 15, 27, 28, 32, 38, 35],
-            // Row 4: 5V(2), 5V(4), SDA/IO2(3), IO23(16), IO4(7), IO27(13), IO21(40), IO13(33)
-            [2, 4, 3, 16, 7, 13, 40, 33]
+            // Row 2: 3V3(1), TXD(8), RXD(10), IO24(18), IO25(22), IO5(29), IO6(31), IO16(36)
+            [1, 8, 10, 18, 22, 29, 31, 36],
+            // Row 3: 5V(2), IO23(16), IO22(15), IDSD(27), IDSC(28), IO12(32), IO20(38), IO19(35)
+            [2, 16, 15, 27, 28, 32, 38, 35],
+            // Row 4: 5V(4), SDA(3), SCL(5), IO4(7), IO27(13), IO21(40), IO13(33), IO26(37)
+            [4, 3, 5, 7, 13, 40, 33, 37]
         ];
 
         for (let row = 0; row < hatLayout.length; row++) {

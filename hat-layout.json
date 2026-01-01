@@ -20,44 +20,44 @@
       },
       {
         "row": 2,
-        "note": "Second row - reading from HAT photo",
+        "note": "Second row - VERIFIED CORRECT",
         "columns": [
-          {"col": 1, "physical_pin": 2, "bcm_gpio": null, "label": "+5V"},
-          {"col": 2, "physical_pin": 16, "bcm_gpio": 23, "label": "IO23"},
+          {"col": 1, "physical_pin": 1, "bcm_gpio": null, "label": "+3V3"},
+          {"col": 2, "physical_pin": 8, "bcm_gpio": 14, "label": "TXD"},
           {"col": 3, "physical_pin": 10, "bcm_gpio": 15, "label": "RXD"},
           {"col": 4, "physical_pin": 18, "bcm_gpio": 24, "label": "IO24"},
           {"col": 5, "physical_pin": 22, "bcm_gpio": 25, "label": "IO25"},
+          {"col": 6, "physical_pin": 29, "bcm_gpio": 5, "label": "IO5"},
+          {"col": 7, "physical_pin": 31, "bcm_gpio": 6, "label": "IO6"},
+          {"col": 8, "physical_pin": 36, "bcm_gpio": 16, "label": "IO16"}
+        ]
+      },
+      {
+        "row": 3,
+        "note": "Third row - VERIFIED CORRECT",
+        "columns": [
+          {"col": 1, "physical_pin": 2, "bcm_gpio": null, "label": "+5V"},
+          {"col": 2, "physical_pin": 16, "bcm_gpio": 23, "label": "IO23"},
+          {"col": 3, "physical_pin": 15, "bcm_gpio": 22, "label": "IO22"},
+          {"col": 4, "physical_pin": 27, "bcm_gpio": 0, "label": "IDSD"},
+          {"col": 5, "physical_pin": 28, "bcm_gpio": 1, "label": "IDSC"},
           {"col": 6, "physical_pin": 32, "bcm_gpio": 12, "label": "IO12"},
           {"col": 7, "physical_pin": 38, "bcm_gpio": 20, "label": "IO20"},
           {"col": 8, "physical_pin": 35, "bcm_gpio": 19, "label": "IO19"}
         ]
       },
       {
-        "row": 3,
-        "note": "Third row - reading from HAT photo",
-        "columns": [
-          {"col": 1, "physical_pin": 3, "bcm_gpio": 2, "label": "SDA"},
-          {"col": 2, "physical_pin": 15, "bcm_gpio": 22, "label": "IO22"},
-          {"col": 3, "physical_pin": 27, "bcm_gpio": 0, "label": "IDSD"},
-          {"col": 4, "physical_pin": 29, "bcm_gpio": 5, "label": "IO5"},
-          {"col": 5, "physical_pin": 31, "bcm_gpio": 6, "label": "IO6"},
-          {"col": 6, "physical_pin": 36, "bcm_gpio": 16, "label": "IO16"},
-          {"col": 7, "physical_pin": 37, "bcm_gpio": 26, "label": "IO26"},
-          {"col": 8, "physical_pin": 40, "bcm_gpio": 21, "label": "IO21"}
-        ]
-      },
-      {
         "row": 4,
-        "note": "Bottom row - reading from HAT photo",
+        "note": "Bottom row - VERIFIED CORRECT",
         "columns": [
-          {"col": 1, "physical_pin": 7, "bcm_gpio": 4, "label": "IO4"},
-          {"col": 2, "physical_pin": 13, "bcm_gpio": 27, "label": "IO27"},
-          {"col": 3, "physical_pin": 28, "bcm_gpio": 1, "label": "IDSC"},
-          {"col": 4, "physical_pin": 8, "bcm_gpio": 14, "label": "TXD"},
-          {"col": 5, "physical_pin": 1, "bcm_gpio": null, "label": "+3V3"},
-          {"col": 6, "physical_pin": 4, "bcm_gpio": null, "label": "+5V"},
-          {"col": 7, "physical_pin": 5, "bcm_gpio": 3, "label": "SCL"},
-          {"col": 8, "physical_pin": 33, "bcm_gpio": 13, "label": "IO13"}
+          {"col": 1, "physical_pin": 4, "bcm_gpio": null, "label": "+5V"},
+          {"col": 2, "physical_pin": 3, "bcm_gpio": 2, "label": "SDA"},
+          {"col": 3, "physical_pin": 5, "bcm_gpio": 3, "label": "SCL"},
+          {"col": 4, "physical_pin": 7, "bcm_gpio": 4, "label": "IO4"},
+          {"col": 5, "physical_pin": 13, "bcm_gpio": 27, "label": "IO27"},
+          {"col": 6, "physical_pin": 40, "bcm_gpio": 21, "label": "IO21"},
+          {"col": 7, "physical_pin": 33, "bcm_gpio": 13, "label": "IO13"},
+          {"col": 8, "physical_pin": 37, "bcm_gpio": 26, "label": "IO26"}
         ]
       }
     ]
