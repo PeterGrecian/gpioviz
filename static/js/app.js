@@ -12,7 +12,8 @@ let currentLayout = '2x20';
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
     loadPinStates();
-    setInterval(updatePinStates, 1000);
+    // Poll more frequently to show real-time GPIO state
+    setInterval(updatePinStates, 100);
 });
 
 function initializeEventListeners() {
@@ -85,15 +86,12 @@ function updateUI() {
                 indicator.classList.remove('input-mode');
             }
 
-            // Update indicator state
-            if (state.flashing) {
-                indicator.classList.add('flashing');
-                indicator.classList.remove('active');
-            } else if (state.state === 1) {
+            // Update indicator state - show actual GPIO state
+            // When flashing, the state value will toggle, so we just reflect it
+            if (state.state === 1) {
                 indicator.classList.add('active');
-                indicator.classList.remove('flashing');
             } else {
-                indicator.classList.remove('active', 'flashing');
+                indicator.classList.remove('active');
             }
 
             // Update radio buttons

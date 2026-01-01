@@ -281,21 +281,6 @@ body.flash-tool-active .pin-indicator {
     box-shadow: 0 0 10px #2ecc71;
 }
 
-.pin-indicator.flashing {
-    animation: flash 0.5s infinite;
-}
-
-@keyframes flash {
-    0%, 100% {
-        background: #2ecc71;
-        box-shadow: 0 0 20px #2ecc71;
-    }
-    50% {
-        background: #2c3e50;
-        box-shadow: none;
-    }
-}
-
 .pin-indicator.power {
     background: #e91e63;
     border-color: #c2185b;
