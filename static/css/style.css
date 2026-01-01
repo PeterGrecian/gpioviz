@@ -597,6 +597,11 @@ body.peripheral-tool-active .pin-indicator {
         justify-content: center;
     }
 
+    .pin-row.layout-header .pin-column {
+        display: flex;
+        flex-direction: column;
+    }
+
     .pin-row.layout-header .pin {
         min-width: 120px;
         font-size: 9px;
@@ -610,16 +615,20 @@ body.peripheral-tool-active .pin-indicator {
         font-size: 9px;
     }
 
-    /* Hat mode: reduce size to fit mobile screens */
+    /* Hat mode: reduce size and center */
     .pin-row.layout-hat {
         transform: scale(0.85);
-        transform-origin: top center;
+        transform-origin: center center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 
-    .gpio-board {
+    .layout-toggle {
         display: flex;
         justify-content: center;
-        align-items: center;
+        margin-bottom: 10px;
     }
 
     .pin-row.layout-hat .pin {
