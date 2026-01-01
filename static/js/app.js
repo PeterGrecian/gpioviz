@@ -50,22 +50,26 @@ function initializeEventListeners() {
     document.getElementById('flash-tool').addEventListener('click', toggleFlashTool);
 
     // Add click listeners to GPIO pin indicators
+    // Use querySelectorAll to handle all pins (including clones in Hat mode)
     GPIO_PINS.forEach(pin => {
-        const pinElement = document.querySelector(`.pin[data-pin="${pin}"]`);
-        const indicator = pinElement?.querySelector('.pin-indicator');
+        const pinElements = document.querySelectorAll(`.pin[data-pin="${pin}"]`);
 
-        if (indicator) {
-            indicator.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (flashToolActive) {
-                    activateFlashOnPin(pin);
-                } else if (configToolActive) {
-                    togglePinMode(pin);
-                } else {
-                    togglePinState(pin);
-                }
-            });
-        }
+        pinElements.forEach(pinElement => {
+            const indicator = pinElement.querySelector('.pin-indicator');
+
+            if (indicator) {
+                indicator.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (flashToolActive) {
+                        activateFlashOnPin(pin);
+                    } else if (configToolActive) {
+                        togglePinMode(pin);
+                    } else {
+                        togglePinState(pin);
+                    }
+                });
+            }
+        });
     });
 }
 
@@ -93,39 +97,43 @@ async function updatePinStates() {
 
 function updateUI() {
     GPIO_PINS.forEach(pin => {
-        const pinElement = document.querySelector(`.pin[data-pin="${pin}"]`);
-        const indicator = pinElement.querySelector('.pin-indicator');
-        const modeIndicator = pinElement.querySelector('.pin-mode-indicator');
+        // Update all instances of this pin (handles clones in Hat mode)
+        const pinElements = document.querySelectorAll(`.pin[data-pin="${pin}"]`);
 
-        if (pinStates[pin]) {
-            const state = pinStates[pin];
+        pinElements.forEach(pinElement => {
+            const indicator = pinElement.querySelector('.pin-indicator');
+            const modeIndicator = pinElement.querySelector('.pin-mode-indicator');
 
-            // Update indicator shape based on mode
-            if (state.mode === 'IN') {
-                indicator.classList.add('input-mode');
-            } else {
-                indicator.classList.remove('input-mode');
-            }
+            if (pinStates[pin]) {
+                const state = pinStates[pin];
 
-            // Update indicator state - show actual GPIO state
-            // When flashing, the state value will toggle, so we just reflect it
-            if (state.state === 1) {
-                indicator.classList.add('active');
-            } else {
-                indicator.classList.remove('active');
-            }
-
-            // Update mode indicator
-            if (modeIndicator) {
+                // Update indicator shape based on mode
                 if (state.mode === 'IN') {
-                    modeIndicator.classList.remove('output-mode');
-                    modeIndicator.classList.add('input-mode');
+                    indicator.classList.add('input-mode');
                 } else {
-                    modeIndicator.classList.remove('input-mode');
-                    modeIndicator.classList.add('output-mode');
+                    indicator.classList.remove('input-mode');
+                }
+
+                // Update indicator state - show actual GPIO state
+                // When flashing, the state value will toggle, so we just reflect it
+                if (state.state === 1) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+
+                // Update mode indicator
+                if (modeIndicator) {
+                    if (state.mode === 'IN') {
+                        modeIndicator.classList.remove('output-mode');
+                        modeIndicator.classList.add('input-mode');
+                    } else {
+                        modeIndicator.classList.remove('input-mode');
+                        modeIndicator.classList.add('output-mode');
+                    }
                 }
             }
-        }
+        });
     });
 }
 
