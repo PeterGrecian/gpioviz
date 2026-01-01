@@ -57,9 +57,37 @@ GPIO_PINS = {
     40: 'GPIO21'
 }
 
+# Pin alternative functions mapping
+PIN_ALT_FUNCTIONS = {
+    3: ['I2C1 SDA', 'GPIO'],
+    5: ['I2C1 SCL', 'GPIO'],
+    7: ['GPCLK0', 'GPIO'],
+    8: ['UART TX', 'GPIO'],
+    10: ['UART RX', 'GPIO'],
+    12: ['PWM0', 'PCM CLK', 'GPIO'],
+    19: ['SPI0 MOSI', 'GPIO'],
+    21: ['SPI0 MISO', 'GPIO'],
+    23: ['SPI0 SCLK', 'GPIO'],
+    24: ['SPI0 CE0', 'GPIO'],
+    26: ['SPI0 CE1', 'GPIO'],
+    32: ['PWM0', 'GPIO'],
+    33: ['PWM1', 'GPIO'],
+    35: ['PWM1', 'SPI1 MISO', 'GPIO'],
+    38: ['SPI1 MISO', 'PCM DIN', 'GPIO'],
+    40: ['SPI1 SCLK', 'PCM DOUT', 'GPIO'],
+}
+
 # Initialize pin states (setup pins lazily on first use)
 for pin in GPIO_PINS.keys():
-    pin_states[pin] = {'mode': 'OUT', 'state': 0, 'flashing': False, 'flash_speed': 500}
+    alt_funcs = PIN_ALT_FUNCTIONS.get(pin, ['GPIO'])
+    pin_states[pin] = {
+        'mode': 'OUT',
+        'state': 0,
+        'flashing': False,
+        'flash_speed': 500,
+        'peripheral_mode': 'GPIO',  # Current peripheral function
+        'available_modes': alt_funcs
+    }
 
 def ensure_pin_setup(pin, mode='OUT'):
     """Ensure a pin is properly set up before use"""
@@ -250,6 +278,38 @@ def read_pin(pin):
         return jsonify({'success': True, 'pin': pin, 'state': state})
 
     return jsonify({'success': True, 'pin': pin, 'state': pin_states[pin]['state']})
+
+@app.route('/api/pin/<int:pin>/peripheral', methods=['POST'])
+def toggle_peripheral(pin):
+    """Toggle pin peripheral mode"""
+    global pin_changes
+
+    if pin not in GPIO_PINS:
+        return jsonify({'error': 'Invalid pin'}), 400
+
+    available_modes = pin_states[pin].get('available_modes', ['GPIO'])
+    current_mode = pin_states[pin].get('peripheral_mode', 'GPIO')
+
+    # Find current index and move to next mode
+    try:
+        current_index = available_modes.index(current_mode)
+        next_index = (current_index + 1) % len(available_modes)
+        new_mode = available_modes[next_index]
+    except ValueError:
+        new_mode = available_modes[0]
+
+    pin_states[pin]['peripheral_mode'] = new_mode
+    pin_changes += 1
+
+    # Note: Actual peripheral configuration would require dtoverlay/dtparam
+    # This is a visual indicator only - actual hardware config not changed
+
+    return jsonify({
+        'success': True,
+        'pin': pin,
+        'peripheral_mode': new_mode,
+        'available_modes': available_modes
+    })
 
 @app.route('/api/reset', methods=['POST'])
 def reset_all():

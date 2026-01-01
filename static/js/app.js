@@ -75,24 +75,35 @@ function initializeEventListeners() {
     document.getElementById('btn-hat-mode').addEventListener('click', () => setLayout('hat'));
     document.getElementById('btn-header-mode').addEventListener('click', () => setLayout('header'));
 
-    // Add click listeners to GPIO pin indicators
+    // Add click listeners to GPIO pins
     // Use querySelectorAll to handle all pins (including clones in Hat mode)
     GPIO_PINS.forEach(pin => {
         const pinElements = document.querySelectorAll(`.pin[data-pin="${pin}"]`);
 
         pinElements.forEach(pinElement => {
+            // For peripheral mode, make the whole cell clickable
+            const clickTarget = pinElement;
             const indicator = pinElement.querySelector('.pin-indicator');
 
+            // Click handler for the whole pin cell
+            clickTarget.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (peripheralToolActive) {
+                    togglePeripheralMode(pin);
+                }
+            });
+
+            // Click handler for the indicator (when not in peripheral mode)
             if (indicator) {
                 indicator.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (flashToolActive) {
+                    if (peripheralToolActive) {
+                        // Already handled by cell click
+                        return;
+                    } else if (flashToolActive) {
                         activateFlashOnPin(pin);
                     } else if (configToolActive) {
                         togglePinMode(pin);
-                    } else if (peripheralToolActive) {
-                        // Peripheral tool - show warning but don't do anything yet
-                        alert('⚠ WARNING: Enabling peripheral functions will disable GPIO control for these pins!\n\nThis feature is not yet implemented to prevent accidental misconfiguration.');
                     } else {
                         togglePinState(pin);
                     }
@@ -132,9 +143,16 @@ function updateUI() {
         pinElements.forEach(pinElement => {
             const indicator = pinElement.querySelector('.pin-indicator');
             const modeIndicator = pinElement.querySelector('.pin-mode-indicator');
+            const label = pinElement.querySelector('.pin-label');
 
             if (pinStates[pin]) {
                 const state = pinStates[pin];
+
+                // Update label with peripheral mode in Hat mode
+                if (currentLayout === 'hat' && state.peripheral_mode && state.peripheral_mode !== 'GPIO') {
+                    const pinNumber = pinElement.querySelector('.pin-number').textContent;
+                    label.innerHTML = state.peripheral_mode;
+                }
 
                 // Update indicator shape based on mode
                 if (state.mode === 'IN') {
@@ -320,6 +338,23 @@ async function togglePinState(pin) {
     if (state.mode === 'OUT' && !state.flashing) {
         const newState = state.state === 1 ? 0 : 1;
         await setPin(pin, newState);
+    }
+}
+
+async function togglePeripheralMode(pin) {
+    try {
+        const response = await fetch(`/api/pin/${pin}/peripheral`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data.success) {
+            await loadPinStates();
+        }
+    } catch (error) {
+        console.error('Error toggling peripheral mode:', error);
     }
 }
 
