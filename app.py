@@ -83,9 +83,10 @@ def update_status_line():
     spinner = spinner_chars[spinner_idx]
     spinner_idx = (spinner_idx + 1) % len(spinner_chars)
 
-    status = f"\r{spinner} Uptime: {hours:02d}:{minutes:02d}:{seconds:02d} | Requests: {request_count} | Pin changes: {pin_changes} | Active: {active_count} | Flashing: {flashing_count}"
-    sys.stdout.write(status)
-    sys.stdout.flush()
+    # Clear the line and write status
+    status = f"\r\033[K{spinner} Uptime: {hours:02d}:{minutes:02d}:{seconds:02d} | Requests: {request_count} | Pin changes: {pin_changes} | Active: {active_count} | Flashing: {flashing_count}"
+    sys.stderr.write(status)
+    sys.stderr.flush()
 
 @app.before_request
 def track_request():
