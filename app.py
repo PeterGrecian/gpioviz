@@ -2,8 +2,11 @@ from flask import Flask, render_template, jsonify, request
 import RPi.GPIO as GPIO
 import threading
 import time
+import sys
+from datetime import datetime
 
 app = Flask(__name__)
+app.logger.disabled = True  # Disable Flask's request logging
 
 # GPIO setup
 GPIO.setmode(GPIO.BOARD)
@@ -13,6 +16,13 @@ GPIO.setwarnings(False)
 pin_states = {}
 flashing_pins = {}
 flash_threads = {}
+
+# Stats tracking
+start_time = datetime.now()
+request_count = 0
+pin_changes = 0
+spinner_chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+spinner_idx = 0
 
 # Raspberry Pi Zero 40-pin header
 # Pins 1-40, some are power/ground, some are GPIO
@@ -58,6 +68,32 @@ def ensure_pin_setup(pin, mode='OUT'):
     except Exception as e:
         print(f"Warning: Could not setup pin {pin}: {e}")
 
+def update_status_line():
+    """Update terminal status line with running stats"""
+    global spinner_idx, request_count
+
+    uptime = datetime.now() - start_time
+    hours = int(uptime.total_seconds() // 3600)
+    minutes = int((uptime.total_seconds() % 3600) // 60)
+    seconds = int(uptime.total_seconds() % 60)
+
+    flashing_count = sum(1 for p in pin_states.values() if p.get('flashing', False))
+    active_count = sum(1 for p in pin_states.values() if p.get('state', 0) == 1 and p.get('mode', 'OUT') == 'OUT')
+
+    spinner = spinner_chars[spinner_idx]
+    spinner_idx = (spinner_idx + 1) % len(spinner_chars)
+
+    status = f"\r{spinner} Uptime: {hours:02d}:{minutes:02d}:{seconds:02d} | Requests: {request_count} | Pin changes: {pin_changes} | Active: {active_count} | Flashing: {flashing_count}"
+    sys.stdout.write(status)
+    sys.stdout.flush()
+
+@app.before_request
+def track_request():
+    """Track each request"""
+    global request_count
+    request_count += 1
+    update_status_line()
+
 def flash_pin(pin, speed_ms):
     """Flash a pin at specified speed"""
     ensure_pin_setup(pin, 'OUT')
@@ -84,6 +120,8 @@ def get_pins():
 @app.route('/api/pin/<int:pin>/set', methods=['POST'])
 def set_pin(pin):
     """Set pin state"""
+    global pin_changes
+
     if pin not in GPIO_PINS:
         return jsonify({'error': 'Invalid pin'}), 400
 
@@ -100,17 +138,21 @@ def set_pin(pin):
     ensure_pin_setup(pin, 'OUT')
     GPIO.output(pin, GPIO.HIGH if state else GPIO.LOW)
     pin_states[pin]['state'] = state
+    pin_changes += 1
 
     return jsonify({'success': True, 'pin': pin, 'state': state})
 
 @app.route('/api/pin/<int:pin>/mode', methods=['POST'])
 def set_pin_mode(pin):
     """Set pin mode (IN/OUT)"""
+    global pin_changes
+
     if pin not in GPIO_PINS:
         return jsonify({'error': 'Invalid pin'}), 400
 
     data = request.json
     mode = data.get('mode', 'OUT')
+    pin_changes += 1
 
     # Stop flashing if active
     if pin_states[pin]['flashing']:
@@ -134,6 +176,8 @@ def set_pin_mode(pin):
 @app.route('/api/pin/<int:pin>/flash', methods=['POST'])
 def toggle_flash(pin):
     """Toggle pin flashing"""
+    global pin_changes
+
     if pin not in GPIO_PINS:
         return jsonify({'error': 'Invalid pin'}), 400
 
@@ -142,6 +186,7 @@ def toggle_flash(pin):
     speed = data.get('speed', 500)
 
     pin_states[pin]['flash_speed'] = speed
+    pin_changes += 1
 
     if flash_enabled:
         # Start flashing
@@ -203,6 +248,11 @@ def cleanup():
 
 if __name__ == '__main__':
     try:
-        app.run(host='0.0.0.0', port=5000, debug=True)
+        print("\n" + "="*70)
+        print("  Raspberry Pi GPIO Visualizer")
+        print("  http://0.0.0.0:5000")
+        print("="*70 + "\n")
+        app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
     except KeyboardInterrupt:
+        print("\n\nShutting down...")
         cleanup()
