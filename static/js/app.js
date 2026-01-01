@@ -15,11 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('pin-container');
     originalHTML = container.innerHTML; // Save original layout
 
-    initializeEventListeners();
-    loadPinStates();
-
-    // Set default layout to Hat mode
+    // Set default layout to Hat mode BEFORE initializing listeners
     setLayout('hat');
+
+    loadPinStates();
 
     // Poll at 500ms to show real-time GPIO state
     // For outputs: shows the commanded state (what we wrote)
