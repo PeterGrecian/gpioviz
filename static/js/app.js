@@ -16,11 +16,16 @@ function initializeEventListeners() {
     // Reset all button
     document.getElementById('reset-all').addEventListener('click', resetAll);
 
-    // Add click listeners to GPIO pins
+    // Add click listeners to GPIO pin indicators
     GPIO_PINS.forEach(pin => {
         const pinElement = document.querySelector(`.pin[data-pin="${pin}"]`);
-        if (pinElement) {
-            pinElement.addEventListener('click', () => selectPin(pin));
+        const indicator = pinElement?.querySelector('.pin-indicator');
+
+        if (indicator) {
+            indicator.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePinState(pin);
+            });
         }
     });
 }
@@ -51,6 +56,7 @@ function updateUI() {
     GPIO_PINS.forEach(pin => {
         const pinElement = document.querySelector(`.pin[data-pin="${pin}"]`);
         const indicator = pinElement.querySelector('.pin-indicator');
+        const modeContainer = pinElement.querySelector('.pin-mode');
 
         if (pinStates[pin]) {
             const state = pinStates[pin];
@@ -64,6 +70,15 @@ function updateUI() {
                 indicator.classList.remove('flashing');
             } else {
                 indicator.classList.remove('active', 'flashing');
+            }
+
+            // Update radio buttons
+            const inRadio = modeContainer.querySelector(`input[value="IN"]`);
+            const outRadio = modeContainer.querySelector(`input[value="OUT"]`);
+            if (state.mode === 'IN') {
+                inRadio.checked = true;
+            } else {
+                outRadio.checked = true;
             }
         }
     });
@@ -130,6 +145,17 @@ function showControlPanel(pin) {
     `;
 }
 
+async function togglePinState(pin) {
+    const state = pinStates[pin];
+    if (!state) return;
+
+    // Only toggle if in OUTPUT mode and not flashing
+    if (state.mode === 'OUT' && !state.flashing) {
+        const newState = state.state === 1 ? 0 : 1;
+        await setPin(pin, newState);
+    }
+}
+
 async function setMode(pin, mode) {
     try {
         const response = await fetch(`/api/pin/${pin}/mode`, {
@@ -143,7 +169,6 @@ async function setMode(pin, mode) {
         const data = await response.json();
         if (data.success) {
             await loadPinStates();
-            showControlPanel(pin);
         }
     } catch (error) {
         console.error('Error setting pin mode:', error);

@@ -28,18 +28,30 @@
                     <div class="pin gpio" data-pin="3">
                         <span class="pin-number">3</span>
                         <span class="pin-label">GPIO2</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-3" value="OUT" checked onchange="setMode(3, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-3" value="IN" onchange="setMode(3, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 5 -->
                     <div class="pin gpio" data-pin="5">
                         <span class="pin-number">5</span>
                         <span class="pin-label">GPIO3</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-5" value="OUT" checked onchange="setMode(5, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-5" value="IN" onchange="setMode(5, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 7 -->
                     <div class="pin gpio" data-pin="7">
                         <span class="pin-number">7</span>
                         <span class="pin-label">GPIO4</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-7" value="OUT" checked onchange="setMode(7, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-7" value="IN" onchange="setMode(7, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 9 -->
@@ -52,18 +64,30 @@
                     <div class="pin gpio" data-pin="11">
                         <span class="pin-number">11</span>
                         <span class="pin-label">GPIO17</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-11" value="OUT" checked onchange="setMode(11, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-11" value="IN" onchange="setMode(11, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 13 -->
                     <div class="pin gpio" data-pin="13">
                         <span class="pin-number">13</span>
                         <span class="pin-label">GPIO27</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-13" value="OUT" checked onchange="setMode(13, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-13" value="IN" onchange="setMode(13, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 15 -->
                     <div class="pin gpio" data-pin="15">
                         <span class="pin-number">15</span>
                         <span class="pin-label">GPIO22</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-15" value="OUT" checked onchange="setMode(15, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-15" value="IN" onchange="setMode(15, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 17 -->
@@ -76,18 +100,30 @@
                     <div class="pin gpio" data-pin="19">
                         <span class="pin-number">19</span>
                         <span class="pin-label">GPIO10</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-19" value="OUT" checked onchange="setMode(19, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-19" value="IN" onchange="setMode(19, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 21 -->
                     <div class="pin gpio" data-pin="21">
                         <span class="pin-number">21</span>
                         <span class="pin-label">GPIO9</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-21" value="OUT" checked onchange="setMode(21, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-21" value="IN" onchange="setMode(21, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 23 -->
                     <div class="pin gpio" data-pin="23">
                         <span class="pin-number">23</span>
                         <span class="pin-label">GPIO11</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-23" value="OUT" checked onchange="setMode(23, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-23" value="IN" onchange="setMode(23, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 25 -->
@@ -106,30 +142,50 @@
                     <div class="pin gpio" data-pin="29">
                         <span class="pin-number">29</span>
                         <span class="pin-label">GPIO5</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-29" value="OUT" checked onchange="setMode(29, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-29" value="IN" onchange="setMode(29, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 31 -->
                     <div class="pin gpio" data-pin="31">
                         <span class="pin-number">31</span>
                         <span class="pin-label">GPIO6</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-31" value="OUT" checked onchange="setMode(31, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-31" value="IN" onchange="setMode(31, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 33 -->
                     <div class="pin gpio" data-pin="33">
                         <span class="pin-number">33</span>
                         <span class="pin-label">GPIO13</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-33" value="OUT" checked onchange="setMode(33, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-33" value="IN" onchange="setMode(33, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 35 -->
                     <div class="pin gpio" data-pin="35">
                         <span class="pin-number">35</span>
                         <span class="pin-label">GPIO19</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-35" value="OUT" checked onchange="setMode(35, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-35" value="IN" onchange="setMode(35, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 37 -->
                     <div class="pin gpio" data-pin="37">
                         <span class="pin-number">37</span>
                         <span class="pin-label">GPIO26</span>
+                        <div class="pin-mode">
+                            <label><input type="radio" name="mode-37" value="OUT" checked onchange="setMode(37, 'OUT')">O</label>
+                            <label><input type="radio" name="mode-37" value="IN" onchange="setMode(37, 'IN')">I</label>
+                        </div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 39 -->
