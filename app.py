@@ -93,10 +93,11 @@ def update_status_line():
 
 @app.before_request
 def track_request():
-    """Track each request (API calls only, not static files)"""
+    """Track each request (user actions only, not polling)"""
     global request_count
-    # Only count API requests and page loads, not static files
-    if request.path.startswith('/api/') or request.path == '/':
+    # Only count user actions: page loads, pin changes, mode changes, etc.
+    # Exclude /api/pins (polling) and static files
+    if request.path == '/' or (request.path.startswith('/api/') and request.path != '/api/pins' and request.path != '/api/version'):
         request_count += 1
         update_status_line()
 
