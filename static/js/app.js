@@ -6,6 +6,7 @@ let pinStates = {};
 let flashIntervals = {};
 let flashToolActive = false;
 let globalFlashSpeed = 500;
+let currentLayout = '2x20';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -307,6 +308,38 @@ async function readPin(pin) {
     }
 }
 
+function setLayout(layout) {
+    currentLayout = layout;
+    const container = document.getElementById('pin-container');
+    const buttons = document.querySelectorAll('.layout-toggle button');
+
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (layout === '4x10') {
+        container.classList.add('layout-4x10');
+        // Reorganize into 4 columns of 10 pins each
+        const columns = container.querySelectorAll('.pin-column');
+        columns.forEach(col => col.style.display = 'none');
+
+        // Create new 4x10 layout
+        container.innerHTML = '';
+        for (let i = 0; i < 4; i++) {
+            const col = document.createElement('div');
+            col.className = 'pin-column';
+            for (let j = 0; j < 10; j++) {
+                const pinNum = i * 10 + j + 1;
+                const pinEl = document.querySelector(`.pin[data-pin="${pinNum}"]`).cloneNode(true);
+                col.appendChild(pinEl);
+            }
+            container.appendChild(col);
+        }
+    } else {
+        container.classList.remove('layout-4x10');
+        location.reload(); // Reload to restore original layout
+    }
+}
+
 async function resetAll() {
     if (confirm('Reset all pins to LOW output?')) {
         try {
@@ -321,7 +354,7 @@ async function resetAll() {
                 const controlPanel = document.getElementById('control-panel');
                 controlPanel.innerHTML = `
                     <h2>Pin Control</h2>
-                    <p>All pins have been reset. Click a GPIO pin above to configure it.</p>
+                    <p>All pins have been reset. Click a GPIO pin to configure it.</p>
                 `;
             }
         } catch (error) {

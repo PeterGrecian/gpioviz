@@ -23,7 +23,11 @@
 
         <div class="main-content">
         <div class="gpio-board">
-            <div class="pin-row">
+            <div class="layout-toggle">
+                <button class="btn active" onclick="setLayout('2x20')">2 × 20</button>
+                <button class="btn" onclick="setLayout('4x10')">4 × 10</button>
+            </div>
+            <div class="pin-row" id="pin-container">
                 <!-- Left column (odd pins) -->
                 <div class="pin-column left">
                     <!-- Pin 1 -->
@@ -208,13 +212,13 @@
                 <div class="pin-column right">
                     <!-- Pin 2 -->
                     <div class="pin power" data-pin="2">
-                        <div class="pin-indicator power"></div>
+                        <div class="pin-indicator power-5v"></div>
                         <span class="pin-label">5V</span>
                         <span class="pin-number">2</span>
                     </div>
                     <!-- Pin 4 -->
                     <div class="pin power" data-pin="4">
-                        <div class="pin-indicator power"></div>
+                        <div class="pin-indicator power-5v"></div>
                         <span class="pin-label">5V</span>
                         <span class="pin-number">4</span>
                     </div>

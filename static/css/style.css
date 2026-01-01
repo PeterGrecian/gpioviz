@@ -143,10 +143,37 @@ body.flash-tool-active .pin-indicator {
     flex: 0 0 auto;
 }
 
+.layout-toggle {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+    justify-content: center;
+}
+
+.layout-toggle button {
+    padding: 4px 10px;
+    font-size: 11px;
+}
+
+.layout-toggle button.active {
+    background-color: #3498db;
+    color: white;
+}
+
 .pin-row {
     display: flex;
     justify-content: center;
     gap: 20px;
+}
+
+.pin-row.layout-4x10 {
+    flex-wrap: wrap;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.pin-row.layout-4x10 .pin-column {
+    flex: 0 0 calc(25% - 15px);
 }
 
 .pin-column {
@@ -270,6 +297,11 @@ body.flash-tool-active .pin-indicator {
 }
 
 .pin-indicator.power {
+    background: #e91e63;
+    border-color: #c2185b;
+}
+
+.pin-indicator.power-5v {
     background: #e74c3c;
     border-color: #c0392b;
 }
@@ -280,8 +312,9 @@ body.flash-tool-active .pin-indicator {
 }
 
 .pin-indicator.reserved {
-    background: #95a5a6;
-    border-color: #7f8c8d;
+    background: #4dd0e1;
+    border-color: #26c6da;
+    opacity: 0.7;
 }
 
 .control-panel {
