@@ -10,19 +10,12 @@
     <div class="container">
         <header>
             <h1>Raspberry Pi Zero GPIO Control</h1>
-            <div class="header-controls">
-                <button id="config-tool" class="btn btn-config-tool">■ I/O Config</button>
-                <button id="flash-tool" class="btn btn-flash-tool">⚡ Flash</button>
-                <button id="test-sequence" class="btn btn-primary">▶ Test Sequence</button>
-                <button id="all-input" class="btn btn-success">◀ All Input</button>
-                <button id="reset-all" class="btn btn-danger">Reset</button>
+            <div class="version-info">
+                <a href="https://github.com/PeterGrecian/gpioviz" target="_blank">github.com/PeterGrecian/gpioviz</a>
+                <span id="version-tag">v2.0</span>
+                <span id="commit-hash"></span>
             </div>
         </header>
-        <div class="version-info">
-            <a href="https://github.com/PeterGrecian/gpioviz" target="_blank">github.com/PeterGrecian/gpioviz</a>
-            <span id="version-tag">v1.0</span>
-            <span id="commit-hash"></span>
-        </div>
 
         <div class="main-content">
         <div class="gpio-board">
@@ -295,28 +288,19 @@
             </div>
         </div>
 
+        <div class="control-buttons">
+            <button id="config-tool" class="btn btn-config-tool">■ I/O Config</button>
+            <button id="flash-tool" class="btn btn-flash-tool">⚡ Flash</button>
+            <button id="test-sequence" class="btn btn-primary">▶ Test Sequence</button>
+            <button id="all-input" class="btn btn-success">◀ All Input</button>
+            <button id="reset-all" class="btn btn-danger">Reset</button>
         </div>
 
-        <!-- GPIO Safety Notice -->
+        </div>
+
+        <!-- GPIO Notice -->
         <div class="gpio-notice">
-            <h3>⚠ GPIO Safety Information</h3>
-            <p><strong>Configurable Pins:</strong> Almost every pin that is not power (3.3V, 5V) or Ground can be configured as GPIO. Of the 40 pins, 26-28 are standard GPIOs (BCM 0-27 on newer models).</p>
-
-            <p><strong>Dual Functions:</strong> Many pins have secondary functions (I2C, SPI, UART) that are only active if enabled in software. When disabled, they behave as standard GPIOs.</p>
-
-            <p><strong>Important Exceptions:</strong></p>
-            <ul>
-                <li><strong>ID_SD/ID_SC (Pins 27 & 28, turquoise LEDs on HAT):</strong> Reserved for HAT EEPROM communication. Can be used as GPIO by disabling EEPROM check in /boot/config.txt, but not recommended.</li>
-                <li><strong>Pins 3 & 5 (BCM 2 & 3):</strong> Have permanent 1.8kΩ pull-up resistors for I2C. Always pulled HIGH by default.</li>
-                <li><strong>Voltage:</strong> All GPIO pins are 3.3V logic. <strong>Never connect 5V signals - this will damage your Pi!</strong></li>
-            </ul>
-
-            <p><strong>⚠ CRITICAL - Use Resistors When Connecting Pins:</strong></p>
-            <ul>
-                <li>If two Output pins are accidentally configured with opposing states (one HIGH, one LOW), a dead short occurs between 3.3V and Ground.</li>
-                <li>This can draw excessive current (>16mA per pin or 50mA total) and <strong>permanently damage pins, GPIO banks, or the entire SoC.</strong></li>
-                <li><strong>Always use 1kΩ to 10kΩ resistors</strong> between pins to limit current to safe levels.</li>
-            </ul>
+            <p><strong>Note:</strong> Multifunction pins (I2C, SPI, UART) are set to GPIO by default. Always use 1kΩ-10kΩ resistors between pins to prevent damage from accidental shorts.</p>
         </div>
     </div>
 
