@@ -25,10 +25,10 @@
         <div class="main-content">
         <div class="gpio-board">
             <div class="layout-toggle">
-                <button class="btn active" onclick="setLayout('hat')">Hat Mode</button>
-                <button class="btn" onclick="setLayout('header')">Header Mode</button>
+                <button class="btn" id="btn-hat-mode">Hat Mode</button>
+                <button class="btn" id="btn-header-mode">Header Mode</button>
             </div>
-            <div class="pin-row" id="pin-container">
+            <div class="pin-row layout-header" id="pin-container">
                 <!-- Left column (odd pins) -->
                 <div class="pin-column left">
                     <!-- Pin 1 -->

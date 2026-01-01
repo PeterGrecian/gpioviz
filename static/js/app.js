@@ -49,6 +49,10 @@ function initializeEventListeners() {
     // Flash tool button
     document.getElementById('flash-tool').addEventListener('click', toggleFlashTool);
 
+    // Layout toggle buttons
+    document.getElementById('btn-hat-mode').addEventListener('click', () => setLayout('hat'));
+    document.getElementById('btn-header-mode').addEventListener('click', () => setLayout('header'));
+
     // Add click listeners to GPIO pin indicators
     // Use querySelectorAll to handle all pins (including clones in Hat mode)
     GPIO_PINS.forEach(pin => {
@@ -372,15 +376,16 @@ async function readPin(pin) {
 function setLayout(layout) {
     currentLayout = layout;
     const container = document.getElementById('pin-container');
-    const buttons = document.querySelectorAll('.layout-toggle button');
+    const hatBtn = document.getElementById('btn-hat-mode');
+    const headerBtn = document.getElementById('btn-header-mode');
 
-    buttons.forEach(btn => btn.classList.remove('active'));
-    if (event && event.target) {
-        event.target.classList.add('active');
+    // Update button states
+    hatBtn.classList.remove('active');
+    headerBtn.classList.remove('active');
+    if (layout === 'hat') {
+        hatBtn.classList.add('active');
     } else {
-        // If no event (initial load), activate the correct button
-        const targetBtn = layout === 'hat' ? buttons[0] : buttons[1];
-        if (targetBtn) targetBtn.classList.add('active');
+        headerBtn.classList.add('active');
     }
 
     if (layout === 'hat') {
