@@ -272,7 +272,10 @@ body.config-tool-active .pin-indicator {
     text-align: center;
 }
 
-.pin-row.layout-hat .pin-mode-indicator,
+.pin-row.layout-hat .pin-mode-indicator {
+    display: none; /* Hide mode indicator in Hat mode - pin indicator shows mode */
+}
+
 .pin-row.layout-hat .pin-indicator {
     margin: 2px 0;
 }
