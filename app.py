@@ -166,7 +166,8 @@ def set_pin_mode(pin):
         pin_states[pin]['flashing'] = False
 
     if mode == 'IN':
-        GPIO.setup(pin, GPIO.IN)
+        # Set up input with pull-down resistor so it reads LOW by default
+        GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         pin_states[pin]['state'] = GPIO.input(pin)
     else:
         GPIO.setup(pin, GPIO.OUT)
