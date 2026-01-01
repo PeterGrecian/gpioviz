@@ -116,6 +116,11 @@ def index():
 @app.route('/api/pins', methods=['GET'])
 def get_pins():
     """Get all pin states"""
+    # Read actual state of all INPUT pins
+    for pin in GPIO_PINS.keys():
+        if pin_states[pin]['mode'] == 'IN':
+            pin_states[pin]['state'] = GPIO.input(pin)
+
     return jsonify({
         'pins': pin_states,
         'gpio_map': GPIO_PINS
