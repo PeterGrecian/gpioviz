@@ -149,9 +149,19 @@ function updateUI() {
                 const state = pinStates[pin];
 
                 // Update label with peripheral mode in Hat mode
-                if (currentLayout === 'hat' && state.peripheral_mode && state.peripheral_mode !== 'GPIO') {
-                    const pinNumber = pinElement.querySelector('.pin-number').textContent;
-                    label.innerHTML = state.peripheral_mode;
+                if (currentLayout === 'hat') {
+                    const availableModes = state.available_modes || ['GPIO'];
+                    const currentMode = state.peripheral_mode || 'GPIO';
+
+                    if (peripheralToolActive && availableModes.length > 1) {
+                        // Show current mode and next mode preview
+                        const currentIndex = availableModes.indexOf(currentMode);
+                        const nextIndex = (currentIndex + 1) % availableModes.length;
+                        const nextMode = availableModes[nextIndex];
+                        label.innerHTML = `${currentMode}<br><span class="next-mode">→${nextMode}</span>`;
+                    } else if (currentMode !== 'GPIO') {
+                        label.innerHTML = currentMode;
+                    }
                 }
 
                 // Update indicator shape based on mode
@@ -306,6 +316,9 @@ function togglePeripheralTool() {
         button.classList.remove('active');
         document.body.classList.remove('peripheral-tool-active');
     }
+
+    // Update UI to show/hide next mode previews
+    updateUI();
 }
 
 async function togglePinMode(pin) {

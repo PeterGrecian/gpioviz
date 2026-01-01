@@ -381,6 +381,13 @@ body.peripheral-tool-active .pin-indicator {
     display: none; /* Hide alt functions in compact hat mode */
 }
 
+.next-mode {
+    font-size: 8px;
+    opacity: 0.7;
+    color: #e67e22;
+    font-weight: bold;
+}
+
 .pin-mode-indicator {
     width: 12px;
     height: 12px;
