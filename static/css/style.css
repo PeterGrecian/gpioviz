@@ -191,14 +191,17 @@ body.config-tool-active .pin-indicator {
 }
 
 .pin-row.layout-hat {
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
-    gap: 10px;
-    flex-wrap: nowrap;
+    gap: 4px;
+    flex-direction: column;
 }
 
-.pin-row.layout-hat .pin-column {
-    flex: 0 0 calc(25% - 8px);
+.pin-row-hat {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    justify-content: center;
 }
 
 .pin-row.layout-header {

@@ -381,38 +381,37 @@ function setLayout(layout) {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = originalHTML;
 
-        // HAT layout matches physical screw terminal arrangement
-        // 4 columns with specific pin assignments from the HAT diagram
-        // Mapping: GPIO2=SDA(pin3), GPIO3=SCL(pin5), GPIO4(pin7), GPIO14=TXD(pin8), GPIO15=RXD(pin10)
-        // GPIO17(pin11), GPIO18(pin12), GPIO27(pin13), GPIO22(pin15), GPIO23(pin16), GPIO24(pin18)
-        // GPIO10=MOSI(pin19), GPIO9=MISO(pin21), GPIO25(pin22), GPIO11=SCLK(pin23), GPIO8=CE0(pin24)
-        // GPIO7=CE1(pin26), GPIO5(pin29), GPIO6(pin31), GPIO12(pin32), GPIO13(pin33), GPIO19(pin35)
-        // GPIO16(pin36), GPIO26(pin37), GPIO20(pin38), GPIO21(pin40)
+        // HAT layout: 4 rows × 8 columns (GND pins not shown on HAT)
+        // Top-left is 3.3V, bottom-right is GPIO26
+        // Row 1: +3V3, +3V3, +5V, +5V, IO17, TXD, IO23, SDA
+        // Row 2: IO18, RXD, IO22, IO4, MOSI, IO24, IDSD, IO27
+        // Row 3: SCLK, IO5, IO12, IO13, MISO, IO25, IDSC, IO21
+        // Row 4: CE1, IO16, IO19, IO26, CE0, IO6, (skip), (skip)
         const hatLayout = [
-            // Column 1: +5V(2), SDA/GPIO2(3), -, GPIO4(7), GPIO27(13), GPIO21(40), GPIO13(33), GPIO26(37), GND(39)
-            [2, 3, null, 7, 13, 40, 33, 37, 39],
-            // Column 2: +5V(4), GPIO23(16), GPIO22(15), ID_SD(27), ID_SC(28), GPIO12(32), GPIO20(38), GPIO19(35), GND(34)
-            [4, 16, 15, 27, 28, 32, 38, 35, 34],
-            // Column 3: +3V3(1), TXD/GPIO14(8), RXD/GPIO15(10), GPIO24(18), GPIO25(22), GPIO5(29), GPIO6(31), GPIO16(36), GND(30)
-            [1, 8, 10, 18, 22, 29, 31, 36, 30],
-            // Column 4: +3V3(17), GPIO17(11), GPIO18(12), MOSI/GPIO10(19), MISO/GPIO9(21), SCLK/GPIO11(23), CE0/GPIO8(24), CE1/GPIO7(26), GND(25)
-            [17, 11, 12, 19, 21, 23, 24, 26, 25]
+            // Row 1: 3.3V(1), 3.3V(17), 5V(2), 5V(4), IO17(11), TXD(8), IO23(16), SDA(3)
+            [1, 17, 2, 4, 11, 8, 16, 3],
+            // Row 2: IO18(12), RXD(10), IO22(15), IO4(7), MOSI(19), IO24(18), IDSD(27), IO27(13)
+            [12, 10, 15, 7, 19, 18, 27, 13],
+            // Row 3: SCLK(23), IO5(29), IO12(32), IO13(33), MISO(21), IO25(22), IDSC(28), IO21(40)
+            [23, 29, 32, 33, 21, 22, 28, 40],
+            // Row 4: CE1(26), IO16(36), IO19(35), IO26(37), CE0(24), IO6(31)
+            [26, 36, 35, 37, 24, 31]
         ];
 
-        for (let col = 0; col < 4; col++) {
-            const column = document.createElement('div');
-            column.className = 'pin-column';
+        for (let row = 0; row < hatLayout.length; row++) {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'pin-row-hat';
 
-            for (let row = 0; row < hatLayout[col].length; row++) {
-                const pinNum = hatLayout[col][row];
-                if (pinNum !== null) {
+            for (let col = 0; col < hatLayout[row].length; col++) {
+                const pinNum = hatLayout[row][col];
+                if (pinNum !== null && pinNum !== undefined) {
                     const originalPin = tempDiv.querySelector(`.pin[data-pin="${pinNum}"]`);
                     if (originalPin) {
-                        column.appendChild(originalPin.cloneNode(true));
+                        rowDiv.appendChild(originalPin.cloneNode(true));
                     }
                 }
             }
-            container.appendChild(column);
+            container.appendChild(rowDiv);
         }
 
         // Reattach event listeners
