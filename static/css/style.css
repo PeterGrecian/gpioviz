@@ -617,7 +617,7 @@ body.peripheral-tool-active .pin-indicator {
 
     /* Hat mode: reduce size and center */
     .pin-row.layout-hat {
-        transform: scale(0.75);
+        transform: scale(0.88);
         transform-origin: center center;
         width: 100%;
     }
