@@ -11,16 +11,16 @@
         <header>
             <h1>Raspberry Pi Zero GPIO Control</h1>
             <div class="header-controls">
-                <div class="global-flash-control">
-                    <label>Flash:</label>
-                    <input type="range" id="global-flash-speed" min="100" max="2000" step="100" value="500">
-                    <span class="speed-display" id="global-speed-display">500ms</span>
-                </div>
                 <button id="config-tool" class="btn btn-config-tool">■ I/O Config</button>
                 <button id="flash-tool" class="btn btn-flash-tool">⚡ Flash</button>
                 <button id="reset-all" class="btn btn-danger">Reset</button>
             </div>
         </header>
+        <div class="version-info">
+            <a href="https://github.com/PeterGrecian/gpioviz" target="_blank">github.com/PeterGrecian/gpioviz</a>
+            <span id="version-tag">v1.0</span>
+            <span id="commit-hash"></span>
+        </div>
 
         <div class="main-content">
         <div class="gpio-board">

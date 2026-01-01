@@ -34,6 +34,29 @@ header h1 {
     flex: 1;
 }
 
+.version-info {
+    color: white;
+    font-size: 11px;
+    margin-bottom: 10px;
+    padding: 0 10px;
+    opacity: 0.8;
+}
+
+.version-info a {
+    color: #a8d5ff;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+.version-info a:hover {
+    text-decoration: underline;
+}
+
+.version-info span {
+    margin-right: 10px;
+    font-family: monospace;
+}
+
 .header-controls {
     display: flex;
     align-items: center;

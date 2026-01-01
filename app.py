@@ -3,6 +3,7 @@ import RPi.GPIO as GPIO
 import threading
 import time
 import sys
+import subprocess
 from datetime import datetime
 
 app = Flask(__name__)
@@ -242,6 +243,15 @@ def reset_all():
         pin_states[pin] = {'mode': 'OUT', 'state': 0, 'flashing': False, 'flash_speed': 500}
 
     return jsonify({'success': True})
+
+@app.route('/api/version', methods=['GET'])
+def get_version():
+    """Get git version information"""
+    try:
+        commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+        return jsonify({'commit_hash': commit_hash})
+    except Exception as e:
+        return jsonify({'commit_hash': 'unknown'})
 
 def cleanup():
     """Cleanup GPIO on exit"""

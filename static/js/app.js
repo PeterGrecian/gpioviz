@@ -6,9 +6,9 @@ let pinStates = {};
 let flashIntervals = {};
 let flashToolActive = false;
 let configToolActive = false;
-let globalFlashSpeed = 500;
 let currentLayout = 'hat';
 let originalHTML = null;
+const FLASH_SPEED = 500; // Fixed flash speed in ms
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -19,12 +19,25 @@ document.addEventListener('DOMContentLoaded', () => {
     setLayout('hat');
 
     loadPinStates();
+    loadVersionInfo();
 
     // Poll at 500ms to show real-time GPIO state
     // For outputs: shows the commanded state (what we wrote)
     // For inputs: shows actual GPIO voltage reading
     setInterval(updatePinStates, 500);
 });
+
+async function loadVersionInfo() {
+    try {
+        const response = await fetch('/api/version');
+        const data = await response.json();
+        if (data.commit_hash) {
+            document.getElementById('commit-hash').textContent = data.commit_hash;
+        }
+    } catch (error) {
+        console.error('Error loading version info:', error);
+    }
+}
 
 function initializeEventListeners() {
     // Reset all button
@@ -35,13 +48,6 @@ function initializeEventListeners() {
 
     // Flash tool button
     document.getElementById('flash-tool').addEventListener('click', toggleFlashTool);
-
-    // Global flash speed slider
-    const globalSlider = document.getElementById('global-flash-speed');
-    globalSlider.addEventListener('input', (e) => {
-        globalFlashSpeed = parseInt(e.target.value);
-        document.getElementById('global-speed-display').textContent = globalFlashSpeed + 'ms';
-    });
 
     // Add click listeners to GPIO pin indicators
     GPIO_PINS.forEach(pin => {
@@ -296,7 +302,7 @@ async function toggleFlash(pin, enabled = null) {
     if (enabled === null) {
         enabled = !state.flashing;
     }
-    const speed = globalFlashSpeed;
+    const speed = FLASH_SPEED;
 
     try {
         const response = await fetch(`/api/pin/${pin}/flash`, {
