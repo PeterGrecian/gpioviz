@@ -229,6 +229,31 @@ body.config-tool-active .pin-indicator {
     min-width: 180px;
 }
 
+.pin-row.layout-hat .pin {
+    min-width: 70px;
+    max-width: 70px;
+    padding: 6px 4px;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 70px;
+    gap: 2px;
+}
+
+.pin-row.layout-hat .pin-number {
+    font-size: 9px;
+}
+
+.pin-row.layout-hat .pin-label {
+    font-size: 10px;
+    margin: 2px 0;
+    text-align: center;
+}
+
+.pin-row.layout-hat .pin-mode-indicator,
+.pin-row.layout-hat .pin-indicator {
+    margin: 2px 0;
+}
+
 .pin.left {
     justify-content: flex-start;
 }
