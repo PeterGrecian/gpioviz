@@ -6,6 +6,7 @@ let pinStates = {};
 let flashIntervals = {};
 let flashToolActive = false;
 let configToolActive = false;
+let peripheralToolActive = false;
 let currentLayout = 'hat';
 let originalHTML = null;
 const FLASH_SPEED = 500; // Fixed flash speed in ms
@@ -39,6 +40,16 @@ async function loadVersionInfo() {
     } catch (error) {
         console.error('Error loading version info:', error);
     }
+
+    // Detect mobile/desktop based on viewport width
+    const deviceType = window.innerWidth <= 768 ? 'mobile' : 'desktop';
+    document.getElementById('device-type').textContent = deviceType;
+
+    // Update on resize
+    window.addEventListener('resize', () => {
+        const newDeviceType = window.innerWidth <= 768 ? 'mobile' : 'desktop';
+        document.getElementById('device-type').textContent = newDeviceType;
+    });
 }
 
 function initializeEventListeners() {
@@ -50,6 +61,9 @@ function initializeEventListeners() {
 
     // Flash tool button
     document.getElementById('flash-tool').addEventListener('click', toggleFlashTool);
+
+    // Peripheral tool button
+    document.getElementById('peripheral-tool').addEventListener('click', togglePeripheralTool);
 
     // Test sequence button
     document.getElementById('test-sequence').addEventListener('click', toggleTestSequence);
@@ -76,6 +90,9 @@ function initializeEventListeners() {
                         activateFlashOnPin(pin);
                     } else if (configToolActive) {
                         togglePinMode(pin);
+                    } else if (peripheralToolActive) {
+                        // Peripheral tool - show warning but don't do anything yet
+                        alert('⚠ WARNING: Enabling peripheral functions will disable GPIO control for these pins!\n\nThis feature is not yet implemented to prevent accidental misconfiguration.');
                     } else {
                         togglePinState(pin);
                     }
@@ -214,9 +231,12 @@ function toggleConfigTool() {
     configToolActive = !configToolActive;
     const button = document.getElementById('config-tool');
 
-    // Deactivate flash tool if active
+    // Deactivate other tools if active
     if (configToolActive && flashToolActive) {
         toggleFlashTool();
+    }
+    if (configToolActive && peripheralToolActive) {
+        togglePeripheralTool();
     }
 
     if (configToolActive) {
@@ -232,9 +252,12 @@ function toggleFlashTool() {
     flashToolActive = !flashToolActive;
     const button = document.getElementById('flash-tool');
 
-    // Deactivate config tool if active
+    // Deactivate other tools if active
     if (flashToolActive && configToolActive) {
         toggleConfigTool();
+    }
+    if (flashToolActive && peripheralToolActive) {
+        togglePeripheralTool();
     }
 
     if (flashToolActive) {
@@ -243,6 +266,27 @@ function toggleFlashTool() {
     } else {
         button.classList.remove('active');
         document.body.classList.remove('flash-tool-active');
+    }
+}
+
+function togglePeripheralTool() {
+    peripheralToolActive = !peripheralToolActive;
+    const button = document.getElementById('peripheral-tool');
+
+    // Deactivate other tools if active
+    if (peripheralToolActive && flashToolActive) {
+        toggleFlashTool();
+    }
+    if (peripheralToolActive && configToolActive) {
+        toggleConfigTool();
+    }
+
+    if (peripheralToolActive) {
+        button.classList.add('active');
+        document.body.classList.add('peripheral-tool-active');
+    } else {
+        button.classList.remove('active');
+        document.body.classList.remove('peripheral-tool-active');
     }
 }
 

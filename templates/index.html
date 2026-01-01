@@ -14,6 +14,7 @@
                 <a href="https://github.com/PeterGrecian/gpioviz" target="_blank">github.com/PeterGrecian/gpioviz</a>
                 <span id="version-tag">v2.0</span>
                 <span id="commit-hash"></span>
+                <span id="device-type"></span>
             </div>
         </header>
 
@@ -35,14 +36,14 @@
                     <!-- Pin 3 -->
                     <div class="pin gpio" data-pin="3">
                         <span class="pin-number">3</span>
-                        <span class="pin-label">GPIO2</span>
+                        <span class="pin-label">GPIO2 <span class="alt-func">(SDA)</span></span>
                         <div class="pin-mode-indicator output-mode"></div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 5 -->
                     <div class="pin gpio" data-pin="5">
                         <span class="pin-number">5</span>
-                        <span class="pin-label">GPIO3</span>
+                        <span class="pin-label">GPIO3 <span class="alt-func">(SCL)</span></span>
                         <div class="pin-mode-indicator output-mode"></div>
                         <div class="pin-indicator"></div>
                     </div>
@@ -89,21 +90,21 @@
                     <!-- Pin 19 -->
                     <div class="pin gpio" data-pin="19">
                         <span class="pin-number">19</span>
-                        <span class="pin-label">GPIO10</span>
+                        <span class="pin-label">GPIO10 <span class="alt-func">(MOSI)</span></span>
                         <div class="pin-mode-indicator output-mode"></div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 21 -->
                     <div class="pin gpio" data-pin="21">
                         <span class="pin-number">21</span>
-                        <span class="pin-label">GPIO9</span>
+                        <span class="pin-label">GPIO9 <span class="alt-func">(MISO)</span></span>
                         <div class="pin-mode-indicator output-mode"></div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 23 -->
                     <div class="pin gpio" data-pin="23">
                         <span class="pin-number">23</span>
-                        <span class="pin-label">GPIO11</span>
+                        <span class="pin-label">GPIO11 <span class="alt-func">(SCLK)</span></span>
                         <div class="pin-mode-indicator output-mode"></div>
                         <div class="pin-indicator"></div>
                     </div>
@@ -136,14 +137,14 @@
                     <!-- Pin 33 -->
                     <div class="pin gpio" data-pin="33">
                         <span class="pin-number">33</span>
-                        <span class="pin-label">GPIO13</span>
+                        <span class="pin-label">GPIO13 <span class="alt-func">(PWM)</span></span>
                         <div class="pin-mode-indicator output-mode"></div>
                         <div class="pin-indicator"></div>
                     </div>
                     <!-- Pin 35 -->
                     <div class="pin gpio" data-pin="35">
                         <span class="pin-number">35</span>
-                        <span class="pin-label">GPIO19</span>
+                        <span class="pin-label">GPIO19 <span class="alt-func">(PCM)</span></span>
                         <div class="pin-mode-indicator output-mode"></div>
                         <div class="pin-indicator"></div>
                     </div>
@@ -185,19 +186,19 @@
                     <!-- Pin 8 -->
                     <div class="pin gpio" data-pin="8">
                         <div class="pin-indicator"></div>
-                        <span class="pin-label">GPIO14</span>
+                        <span class="pin-label">GPIO14 <span class="alt-func">(TXD)</span></span>
                         <span class="pin-number">8</span>
                     </div>
                     <!-- Pin 10 -->
                     <div class="pin gpio" data-pin="10">
                         <div class="pin-indicator"></div>
-                        <span class="pin-label">GPIO15</span>
+                        <span class="pin-label">GPIO15 <span class="alt-func">(RXD)</span></span>
                         <span class="pin-number">10</span>
                     </div>
                     <!-- Pin 12 -->
                     <div class="pin gpio" data-pin="12">
                         <div class="pin-indicator"></div>
-                        <span class="pin-label">GPIO18</span>
+                        <span class="pin-label">GPIO18 <span class="alt-func">(PCM)</span></span>
                         <span class="pin-number">12</span>
                     </div>
                     <!-- Pin 14 -->
@@ -233,13 +234,13 @@
                     <!-- Pin 24 -->
                     <div class="pin gpio" data-pin="24">
                         <div class="pin-indicator"></div>
-                        <span class="pin-label">GPIO8</span>
+                        <span class="pin-label">GPIO8 <span class="alt-func">(CE0)</span></span>
                         <span class="pin-number">24</span>
                     </div>
                     <!-- Pin 26 -->
                     <div class="pin gpio" data-pin="26">
                         <div class="pin-indicator"></div>
-                        <span class="pin-label">GPIO7</span>
+                        <span class="pin-label">GPIO7 <span class="alt-func">(CE1)</span></span>
                         <span class="pin-number">26</span>
                     </div>
                     <!-- Pin 28 -->
@@ -257,7 +258,7 @@
                     <!-- Pin 32 -->
                     <div class="pin gpio" data-pin="32">
                         <div class="pin-indicator"></div>
-                        <span class="pin-label">GPIO12</span>
+                        <span class="pin-label">GPIO12 <span class="alt-func">(PWM)</span></span>
                         <span class="pin-number">32</span>
                     </div>
                     <!-- Pin 34 -->
@@ -275,13 +276,13 @@
                     <!-- Pin 38 -->
                     <div class="pin gpio" data-pin="38">
                         <div class="pin-indicator"></div>
-                        <span class="pin-label">GPIO20</span>
+                        <span class="pin-label">GPIO20 <span class="alt-func">(PCM)</span></span>
                         <span class="pin-number">38</span>
                     </div>
                     <!-- Pin 40 -->
                     <div class="pin gpio" data-pin="40">
                         <div class="pin-indicator"></div>
-                        <span class="pin-label">GPIO21</span>
+                        <span class="pin-label">GPIO21 <span class="alt-func">(PCM)</span></span>
                         <span class="pin-number">40</span>
                     </div>
                 </div>
@@ -291,6 +292,7 @@
         <div class="control-buttons">
             <button id="config-tool" class="btn btn-config-tool">■ I/O Config</button>
             <button id="flash-tool" class="btn btn-flash-tool">⚡ Flash</button>
+            <button id="peripheral-tool" class="btn btn-peripheral-tool">☠ Peripheral</button>
             <button id="test-sequence" class="btn btn-primary">▶ Test Sequence</button>
             <button id="all-input" class="btn btn-success">◀ All Input</button>
             <button id="reset-all" class="btn btn-danger">Reset</button>

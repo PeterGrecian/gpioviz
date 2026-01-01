@@ -148,6 +148,31 @@ header h1 {
     }
 }
 
+.btn-peripheral-tool {
+    background-color: #c0392b;
+    color: white;
+    position: relative;
+}
+
+.btn-peripheral-tool:hover {
+    background-color: #a93226;
+}
+
+.btn-peripheral-tool.active {
+    background-color: #922b21;
+    box-shadow: 0 0 15px #c0392b, 0 0 30px rgba(192, 57, 43, 0.5), inset 0 2px 4px rgba(0,0,0,0.3);
+    animation: pulse-peripheral 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-peripheral {
+    0%, 100% {
+        box-shadow: 0 0 15px #c0392b, 0 0 30px rgba(192, 57, 43, 0.5), inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+    50% {
+        box-shadow: 0 0 25px #c0392b, 0 0 50px rgba(192, 57, 43, 0.7), inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+}
+
 body.flash-tool-active {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚡</text></svg>') 12 12, auto;
 }
@@ -162,6 +187,14 @@ body.config-tool-active {
 
 body.config-tool-active .pin-indicator {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚙</text></svg>') 12 12, pointer;
+}
+
+body.peripheral-tool-active {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">☠</text></svg>') 12 12, auto;
+}
+
+body.peripheral-tool-active .pin-indicator {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">☠</text></svg>') 12 12, pointer;
 }
 
 .main-content {
@@ -333,6 +366,16 @@ body.config-tool-active .pin-indicator {
     flex: 1;
     font-size: 10px;
     margin: 0 4px;
+}
+
+.alt-func {
+    opacity: 0.6;
+    font-size: 9px;
+    font-style: italic;
+}
+
+.pin-row.layout-hat .alt-func {
+    display: none; /* Hide alt functions in compact hat mode */
 }
 
 .pin-mode-indicator {
