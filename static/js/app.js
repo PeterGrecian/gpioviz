@@ -12,8 +12,10 @@ let currentLayout = '2x20';
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
     loadPinStates();
-    // Poll more frequently to show real-time GPIO state
-    setInterval(updatePinStates, 100);
+    // Poll at 500ms to show real-time GPIO state
+    // For outputs: shows the commanded state (what we wrote)
+    // For inputs: shows actual GPIO voltage reading
+    setInterval(updatePinStates, 500);
 });
 
 function initializeEventListeners() {
