@@ -90,10 +90,12 @@ def update_status_line():
 
 @app.before_request
 def track_request():
-    """Track each request"""
+    """Track each request (API calls only, not static files)"""
     global request_count
-    request_count += 1
-    update_status_line()
+    # Only count API requests and page loads, not static files
+    if request.path.startswith('/api/') or request.path == '/':
+        request_count += 1
+        update_status_line()
 
 def flash_pin(pin, speed_ms):
     """Flash a pin at specified speed"""
@@ -248,12 +250,20 @@ def cleanup():
     GPIO.cleanup()
 
 if __name__ == '__main__':
+    import logging
+
+    # Disable werkzeug logging
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
+
     try:
         print("\n" + "="*70)
         print("  Raspberry Pi GPIO Visualizer")
         print("  http://0.0.0.0:5000")
         print("="*70 + "\n")
-        app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
+        sys.stderr.write("\n")  # Add newline before status starts
+        sys.stderr.flush()
+        app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
     except KeyboardInterrupt:
         print("\n\nShutting down...")
         cleanup()
