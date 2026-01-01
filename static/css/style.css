@@ -524,26 +524,83 @@ body.config-tool-active .pin-indicator {
 }
 
 @media (max-width: 768px) {
-    .pin-row {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .pin {
-        min-width: auto;
-    }
-
     header {
         flex-direction: column;
-        gap: 10px;
+        gap: 5px;
+        align-items: flex-start;
     }
 
     header h1 {
-        font-size: 1.5em;
+        font-size: 1.3em;
+    }
+
+    .version-info {
+        font-size: 10px;
+    }
+
+    .main-content {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .control-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .control-buttons .btn {
+        flex: 1 1 auto;
+        min-width: 100px;
+    }
+
+    /* Header mode: stack columns vertically on mobile */
+    .pin-row.layout-header {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pin-row.layout-header .pin {
+        min-width: 100%;
+    }
+
+    /* Hat mode: reduce size to fit mobile screens */
+    .pin-row.layout-hat {
+        transform: scale(0.85);
+        transform-origin: top center;
+    }
+
+    .pin-row.layout-hat .pin {
+        min-width: 50px;
+        max-width: 50px;
+        min-height: 50px;
+        padding: 3px 2px;
+    }
+
+    .pin-row.layout-hat .pin-number {
+        font-size: 7px;
+    }
+
+    .pin-row.layout-hat .pin-label {
+        font-size: 8px;
+    }
+
+    .pin-row.layout-hat .pin-indicator {
+        width: 12px;
+        height: 12px;
+    }
+
+    .gpio-board {
+        padding: 10px;
+        width: 100%;
     }
 
     .gpio-notice {
-        font-size: 12px;
-        padding: 15px;
+        font-size: 11px;
+        padding: 10px 12px;
+    }
+
+    .gpio-notice h3 {
+        font-size: 0.9em;
     }
 }
