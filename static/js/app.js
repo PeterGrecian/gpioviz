@@ -488,9 +488,9 @@ async function toggleTestSequence() {
         // Set to output mode and flash briefly
         await setMode(pin, 'OUT');
         await setPin(pin, 1);
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 200));
         await setPin(pin, 0);
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 50));
     }
 
     // Reset state
