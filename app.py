@@ -24,6 +24,7 @@ request_count = 0
 pin_changes = 0
 spinner_chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 spinner_idx = 0
+app_ready = False
 
 # Raspberry Pi Zero 40-pin header
 # Pins 1-40, some are power/ground, some are GPIO
@@ -75,6 +76,12 @@ def update_status_line():
     """Update terminal status line with running stats"""
     global spinner_idx, request_count
 
+    if not app_ready:
+        # Show "Ready" message until first client connects
+        sys.stderr.write("\r\033[K✓ Server ready - waiting for client connection...")
+        sys.stderr.flush()
+        return
+
     uptime = datetime.now() - start_time
     hours = int(uptime.total_seconds() // 3600)
     minutes = int((uptime.total_seconds() % 3600) // 60)
@@ -119,6 +126,13 @@ def index():
 @app.route('/api/pins', methods=['GET'])
 def get_pins():
     """Get all pin states"""
+    global app_ready
+
+    # Mark app as ready on first poll
+    if not app_ready:
+        app_ready = True
+        update_status_line()
+
     # Read actual state of all INPUT pins
     for pin in GPIO_PINS.keys():
         if pin_states[pin]['mode'] == 'IN':
@@ -282,6 +296,7 @@ if __name__ == '__main__':
         print("="*70 + "\n")
         sys.stderr.write("\n")  # Add newline before status starts
         sys.stderr.flush()
+        update_status_line()  # Show "ready" message
         app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
     except KeyboardInterrupt:
         print("\n\nShutting down...")
