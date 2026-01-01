@@ -614,8 +614,12 @@ body.peripheral-tool-active .pin-indicator {
     .pin-row.layout-hat {
         transform: scale(0.85);
         transform-origin: top center;
-        margin: 0 auto;
-        width: fit-content;
+    }
+
+    .gpio-board {
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .pin-row.layout-hat .pin {
