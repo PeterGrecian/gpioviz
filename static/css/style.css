@@ -484,6 +484,46 @@ body.config-tool-active .pin-indicator {
     }
 }
 
+.gpio-notice {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.gpio-notice h3 {
+    color: #e74c3c;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.gpio-notice p {
+    color: #2c3e50;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.gpio-notice ul {
+    margin-left: 20px;
+    margin-bottom: 12px;
+}
+
+.gpio-notice li {
+    color: #2c3e50;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.gpio-notice strong {
+    color: #c0392b;
+}
+
 @media (max-width: 768px) {
     .pin-row {
         flex-direction: column;
@@ -501,5 +541,10 @@ body.config-tool-active .pin-indicator {
 
     header h1 {
         font-size: 1.5em;
+    }
+
+    .gpio-notice {
+        font-size: 12px;
+        padding: 15px;
     }
 }
