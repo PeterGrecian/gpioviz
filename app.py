@@ -63,9 +63,11 @@ for pin in GPIO_PINS.keys():
 def ensure_pin_setup(pin, mode='OUT'):
     """Ensure a pin is properly set up before use"""
     try:
-        GPIO.setup(pin, GPIO.OUT if mode == 'OUT' else GPIO.IN)
         if mode == 'OUT':
+            GPIO.setup(pin, GPIO.OUT)
             GPIO.output(pin, GPIO.LOW)
+        else:
+            GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     except Exception as e:
         print(f"Warning: Could not setup pin {pin}: {e}")
 

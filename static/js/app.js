@@ -54,6 +54,9 @@ function initializeEventListeners() {
     // Test sequence button
     document.getElementById('test-sequence').addEventListener('click', toggleTestSequence);
 
+    // All input button
+    document.getElementById('all-input').addEventListener('click', setAllInput);
+
     // Layout toggle buttons
     document.getElementById('btn-hat-mode').addEventListener('click', () => setLayout('hat'));
     document.getElementById('btn-header-mode').addEventListener('click', () => setLayout('header'));
@@ -459,6 +462,14 @@ async function toggleTestSequence() {
     button.textContent = '⏹ Stop Test';
     button.classList.add('active');
 
+    // Save original pin modes
+    const originalModes = {};
+    GPIO_PINS.forEach(pin => {
+        if (pinStates[pin]) {
+            originalModes[pin] = pinStates[pin].mode;
+        }
+    });
+
     // Get pin order based on current layout
     let pinOrder = [];
     if (currentLayout === 'hat') {
@@ -493,11 +504,29 @@ async function toggleTestSequence() {
         await new Promise(resolve => setTimeout(resolve, 50));
     }
 
+    // Restore original pin modes
+    if (!testSequenceAbort) {
+        for (let pin of GPIO_PINS) {
+            if (originalModes[pin] && originalModes[pin] !== pinStates[pin].mode) {
+                await setMode(pin, originalModes[pin]);
+            }
+        }
+    }
+
     // Reset state
     testSequenceRunning = false;
     testSequenceAbort = false;
     button.textContent = '▶ Test Sequence';
     button.classList.remove('active');
+}
+
+async function setAllInput() {
+    if (confirm('Set all GPIO pins to INPUT mode?')) {
+        for (let pin of GPIO_PINS) {
+            await setMode(pin, 'IN');
+        }
+        await loadPinStates();
+    }
 }
 
 async function resetAll() {
