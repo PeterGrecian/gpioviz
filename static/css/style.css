@@ -140,8 +140,18 @@ header h1 {
 }
 
 .btn-flash-tool.active {
-    background-color: #e67e22;
-    box-shadow: 0 0 10px #f39c12, inset 0 2px 4px rgba(0,0,0,0.3);
+    background-color: #d35400;
+    box-shadow: 0 0 15px #f39c12, 0 0 30px rgba(243, 156, 18, 0.5), inset 0 2px 4px rgba(0,0,0,0.3);
+    animation: pulse-flash 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-flash {
+    0%, 100% {
+        box-shadow: 0 0 15px #f39c12, 0 0 30px rgba(243, 156, 18, 0.5), inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+    50% {
+        box-shadow: 0 0 25px #f39c12, 0 0 50px rgba(243, 156, 18, 0.7), inset 0 2px 4px rgba(0,0,0,0.3);
+    }
 }
 
 .btn-config-tool {
@@ -155,8 +165,18 @@ header h1 {
 }
 
 .btn-config-tool.active {
-    background-color: #8e44ad;
-    box-shadow: 0 0 10px #9b59b6, inset 0 2px 4px rgba(0,0,0,0.3);
+    background-color: #7d3c98;
+    box-shadow: 0 0 15px #9b59b6, 0 0 30px rgba(155, 89, 182, 0.5), inset 0 2px 4px rgba(0,0,0,0.3);
+    animation: pulse-config 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-config {
+    0%, 100% {
+        box-shadow: 0 0 15px #9b59b6, 0 0 30px rgba(155, 89, 182, 0.5), inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+    50% {
+        box-shadow: 0 0 25px #9b59b6, 0 0 50px rgba(155, 89, 182, 0.7), inset 0 2px 4px rgba(0,0,0,0.3);
+    }
 }
 
 body.flash-tool-active {
@@ -272,8 +292,9 @@ body.config-tool-active .pin-indicator {
     text-align: center;
 }
 
-.pin-row.layout-hat .pin-mode-indicator {
-    display: none; /* Hide mode indicator in Hat mode - pin indicator shows mode */
+.pin-row.layout-hat .pin-mode-indicator,
+.pin-row.layout-header .pin-mode-indicator {
+    display: none; /* Hide mode indicator - pin indicator shows mode (circle=OUTPUT, square=INPUT) */
 }
 
 .pin-row.layout-hat .pin-indicator {
