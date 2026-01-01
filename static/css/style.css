@@ -187,16 +187,28 @@ body.config-tool-active .pin-indicator {
     display: flex;
     justify-content: center;
     gap: 20px;
-}
-
-.pin-row.layout-4x10 {
     flex-wrap: wrap;
-    max-width: 800px;
-    margin: 0 auto;
 }
 
-.pin-row.layout-4x10 .pin-column {
-    flex: 0 0 calc(25% - 15px);
+.pin-row.layout-hat {
+    max-width: 900px;
+    margin: 0 auto;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+
+.pin-row.layout-hat .pin-column {
+    flex: 0 0 calc(25% - 8px);
+}
+
+.pin-row.layout-header {
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.pin-row.layout-header .pin-column.left,
+.pin-row.layout-header .pin-column.right {
+    flex: 0 0 auto;
 }
 
 .pin-column {

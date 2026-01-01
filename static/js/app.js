@@ -7,12 +7,20 @@ let flashIntervals = {};
 let flashToolActive = false;
 let configToolActive = false;
 let globalFlashSpeed = 500;
-let currentLayout = '2x20';
+let currentLayout = 'hat';
+let originalHTML = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('pin-container');
+    originalHTML = container.innerHTML; // Save original layout
+
     initializeEventListeners();
     loadPinStates();
+
+    // Set default layout to Hat mode
+    setLayout('hat');
+
     // Poll at 500ms to show real-time GPIO state
     // For outputs: shows the commanded state (what we wrote)
     // For inputs: shows actual GPIO voltage reading
@@ -354,29 +362,50 @@ function setLayout(layout) {
     const buttons = document.querySelectorAll('.layout-toggle button');
 
     buttons.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-
-    if (layout === '4x10') {
-        container.classList.add('layout-4x10');
-        // Reorganize into 4 columns of 10 pins each
-        const columns = container.querySelectorAll('.pin-column');
-        columns.forEach(col => col.style.display = 'none');
-
-        // Create new 4x10 layout
-        container.innerHTML = '';
-        for (let i = 0; i < 4; i++) {
-            const col = document.createElement('div');
-            col.className = 'pin-column';
-            for (let j = 0; j < 10; j++) {
-                const pinNum = i * 10 + j + 1;
-                const pinEl = document.querySelector(`.pin[data-pin="${pinNum}"]`).cloneNode(true);
-                col.appendChild(pinEl);
-            }
-            container.appendChild(col);
-        }
+    if (event && event.target) {
+        event.target.classList.add('active');
     } else {
-        container.classList.remove('layout-4x10');
-        location.reload(); // Reload to restore original layout
+        // If no event (initial load), activate the correct button
+        const targetBtn = layout === 'hat' ? buttons[0] : buttons[1];
+        if (targetBtn) targetBtn.classList.add('active');
+    }
+
+    if (layout === 'hat') {
+        container.classList.remove('layout-header');
+        container.classList.add('layout-hat');
+
+        // Clear existing layout
+        container.innerHTML = '';
+
+        // Create 4 columns of 10 pins each
+        // Parse original HTML to extract pin data
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = originalHTML;
+
+        for (let col = 0; col < 4; col++) {
+            const column = document.createElement('div');
+            column.className = 'pin-column';
+
+            for (let row = 0; row < 10; row++) {
+                const pinNum = col * 10 + row + 1;
+                const originalPin = tempDiv.querySelector(`.pin[data-pin="${pinNum}"]`);
+                if (originalPin) {
+                    column.appendChild(originalPin.cloneNode(true));
+                }
+            }
+            container.appendChild(column);
+        }
+
+        // Reattach event listeners
+        initializeEventListeners();
+    } else {
+        // Restore header mode (2×20)
+        container.classList.remove('layout-hat');
+        container.classList.add('layout-header');
+        container.innerHTML = originalHTML;
+
+        // Reattach event listeners
+        initializeEventListeners();
     }
 }
 
