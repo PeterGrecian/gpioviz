@@ -1,0 +1,282 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.btn-success {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #27ae60;
+}
+
+.gpio-board {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.pin-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.pin-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pin {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-width: 250px;
+}
+
+.pin.left {
+    justify-content: flex-start;
+}
+
+.pin.right {
+    justify-content: flex-end;
+}
+
+.pin.gpio {
+    background: #ecf0f1;
+    cursor: pointer;
+}
+
+.pin.gpio:hover {
+    background: #d5dbdb;
+    transform: scale(1.02);
+}
+
+.pin.power {
+    background: #ffe6e6;
+}
+
+.pin.ground {
+    background: #2c3e50;
+    color: white;
+}
+
+.pin.reserved {
+    background: #f8f9fa;
+    opacity: 0.6;
+}
+
+.pin-number {
+    font-weight: bold;
+    min-width: 25px;
+    font-size: 14px;
+}
+
+.pin-label {
+    flex: 1;
+    font-size: 14px;
+    margin: 0 10px;
+}
+
+.pin-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #95a5a6;
+    border: 2px solid #7f8c8d;
+    transition: all 0.3s ease;
+}
+
+.pin-indicator.active {
+    background: #2ecc71;
+    border-color: #27ae60;
+    box-shadow: 0 0 10px #2ecc71;
+}
+
+.pin-indicator.flashing {
+    animation: flash 0.5s infinite;
+}
+
+@keyframes flash {
+    0%, 100% {
+        background: #2ecc71;
+        box-shadow: 0 0 20px #2ecc71;
+    }
+    50% {
+        background: #95a5a6;
+        box-shadow: none;
+    }
+}
+
+.pin-indicator.power {
+    background: #e74c3c;
+    border-color: #c0392b;
+}
+
+.pin-indicator.ground {
+    background: #34495e;
+    border-color: #2c3e50;
+}
+
+.pin-indicator.reserved {
+    background: #95a5a6;
+    border-color: #7f8c8d;
+}
+
+.control-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.control-panel h2 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.control-panel p {
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.control-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.form-group select,
+.form-group input {
+    padding: 10px;
+    border: 2px solid #ecf0f1;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.flash-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.flash-controls label {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.flash-controls input[type="range"] {
+    flex: 1;
+}
+
+.speed-value {
+    min-width: 60px;
+    text-align: right;
+    font-weight: 600;
+    color: #7f8c8d;
+}
+
+@media (max-width: 768px) {
+    .pin-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .pin {
+        min-width: auto;
+    }
+
+    header h1 {
+        font-size: 1.8em;
+    }
+}

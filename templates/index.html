@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspberry Pi GPIO Visualizer</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Raspberry Pi Zero GPIO Control</h1>
+            <button id="reset-all" class="btn btn-danger">Reset All Pins</button>
+        </header>
+
+        <div class="gpio-board">
+            <div class="pin-row">
+                <!-- Left column (odd pins) -->
+                <div class="pin-column left">
+                    <!-- Pin 1 -->
+                    <div class="pin power" data-pin="1">
+                        <span class="pin-number">1</span>
+                        <span class="pin-label">3.3V</span>
+                        <div class="pin-indicator power"></div>
+                    </div>
+                    <!-- Pin 3 -->
+                    <div class="pin gpio" data-pin="3">
+                        <span class="pin-number">3</span>
+                        <span class="pin-label">GPIO2</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 5 -->
+                    <div class="pin gpio" data-pin="5">
+                        <span class="pin-number">5</span>
+                        <span class="pin-label">GPIO3</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 7 -->
+                    <div class="pin gpio" data-pin="7">
+                        <span class="pin-number">7</span>
+                        <span class="pin-label">GPIO4</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 9 -->
+                    <div class="pin ground" data-pin="9">
+                        <span class="pin-number">9</span>
+                        <span class="pin-label">GND</span>
+                        <div class="pin-indicator ground"></div>
+                    </div>
+                    <!-- Pin 11 -->
+                    <div class="pin gpio" data-pin="11">
+                        <span class="pin-number">11</span>
+                        <span class="pin-label">GPIO17</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 13 -->
+                    <div class="pin gpio" data-pin="13">
+                        <span class="pin-number">13</span>
+                        <span class="pin-label">GPIO27</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 15 -->
+                    <div class="pin gpio" data-pin="15">
+                        <span class="pin-number">15</span>
+                        <span class="pin-label">GPIO22</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 17 -->
+                    <div class="pin power" data-pin="17">
+                        <span class="pin-number">17</span>
+                        <span class="pin-label">3.3V</span>
+                        <div class="pin-indicator power"></div>
+                    </div>
+                    <!-- Pin 19 -->
+                    <div class="pin gpio" data-pin="19">
+                        <span class="pin-number">19</span>
+                        <span class="pin-label">GPIO10</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 21 -->
+                    <div class="pin gpio" data-pin="21">
+                        <span class="pin-number">21</span>
+                        <span class="pin-label">GPIO9</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 23 -->
+                    <div class="pin gpio" data-pin="23">
+                        <span class="pin-number">23</span>
+                        <span class="pin-label">GPIO11</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 25 -->
+                    <div class="pin ground" data-pin="25">
+                        <span class="pin-number">25</span>
+                        <span class="pin-label">GND</span>
+                        <div class="pin-indicator ground"></div>
+                    </div>
+                    <!-- Pin 27 -->
+                    <div class="pin reserved" data-pin="27">
+                        <span class="pin-number">27</span>
+                        <span class="pin-label">ID_SD</span>
+                        <div class="pin-indicator reserved"></div>
+                    </div>
+                    <!-- Pin 29 -->
+                    <div class="pin gpio" data-pin="29">
+                        <span class="pin-number">29</span>
+                        <span class="pin-label">GPIO5</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 31 -->
+                    <div class="pin gpio" data-pin="31">
+                        <span class="pin-number">31</span>
+                        <span class="pin-label">GPIO6</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 33 -->
+                    <div class="pin gpio" data-pin="33">
+                        <span class="pin-number">33</span>
+                        <span class="pin-label">GPIO13</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 35 -->
+                    <div class="pin gpio" data-pin="35">
+                        <span class="pin-number">35</span>
+                        <span class="pin-label">GPIO19</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 37 -->
+                    <div class="pin gpio" data-pin="37">
+                        <span class="pin-number">37</span>
+                        <span class="pin-label">GPIO26</span>
+                        <div class="pin-indicator"></div>
+                    </div>
+                    <!-- Pin 39 -->
+                    <div class="pin ground" data-pin="39">
+                        <span class="pin-number">39</span>
+                        <span class="pin-label">GND</span>
+                        <div class="pin-indicator ground"></div>
+                    </div>
+                </div>
+
+                <!-- Right column (even pins) -->
+                <div class="pin-column right">
+                    <!-- Pin 2 -->
+                    <div class="pin power" data-pin="2">
+                        <div class="pin-indicator power"></div>
+                        <span class="pin-label">5V</span>
+                        <span class="pin-number">2</span>
+                    </div>
+                    <!-- Pin 4 -->
+                    <div class="pin power" data-pin="4">
+                        <div class="pin-indicator power"></div>
+                        <span class="pin-label">5V</span>
+                        <span class="pin-number">4</span>
+                    </div>
+                    <!-- Pin 6 -->
+                    <div class="pin ground" data-pin="6">
+                        <div class="pin-indicator ground"></div>
+                        <span class="pin-label">GND</span>
+                        <span class="pin-number">6</span>
+                    </div>
+                    <!-- Pin 8 -->
+                    <div class="pin gpio" data-pin="8">
+                        <div class="pin-indicator"></div>
+                        <span class="pin-label">GPIO14</span>
+                        <span class="pin-number">8</span>
+                    </div>
+                    <!-- Pin 10 -->
+                    <div class="pin gpio" data-pin="10">
+                        <div class="pin-indicator"></div>
+                        <span class="pin-label">GPIO15</span>
+                        <span class="pin-number">10</span>
+                    </div>
+                    <!-- Pin 12 -->
+                    <div class="pin gpio" data-pin="12">
+                        <div class="pin-indicator"></div>
+                        <span class="pin-label">GPIO18</span>
+                        <span class="pin-number">12</span>
+                    </div>
+                    <!-- Pin 14 -->
+                    <div class="pin ground" data-pin="14">
+                        <div class="pin-indicator ground"></div>
+                        <span class="pin-label">GND</span>
+                        <span class="pin-number">14</span>
+                    </div>
+                    <!-- Pin 16 -->
+                    <div class="pin gpio" data-pin="16">
+                        <div class="pin-indicator"></div>
+                        <span class="pin-label">GPIO23</span>
+                        <span class="pin-number">16</span>
+                    </div>
+                    <!-- Pin 18 -->
+                    <div class="pin gpio" data-pin="18">
+                        <div class="pin-indicator"></div>
+                        <span class="pin-label">GPIO24</span>
+                        <span class="pin-number">18</span>
+                    </div>
+                    <!-- Pin 20 -->
+                    <div class="pin ground" data-pin="20">
+                        <div class="pin-indicator ground"></div>
+                        <span class="pin-label">GND</span>
+                        <span class="pin-number">20</span>
+                    </div>
+                    <!-- Pin 22 -->
+                    <div class="pin gpio" data-pin="22">
+                        <div class="pin-indicator"></div>
+                        <span class="pin-label">GPIO25</span>
+                        <span class="pin-number">22</span>
+                    </div>
+                    <!-- Pin 24 -->
+                    <div class="pin gpio" data-pin="24">
+                        <div class="pin-indicator"></div>
+                        <span class="pin-label">GPIO8</span>
+                        <span class="pin-number">24</span>
+                    </div>
+                    <!-- Pin 26 -->
+                    <div class="pin gpio" data-pin="26">
+                        <div class="pin-indicator"></div>
+                        <span class="pin-label">GPIO7</span>
+                        <span class="pin-number">26</span>
+                    </div>
+                    <!-- Pin 28 -->
+                    <div class="pin reserved" data-pin="28">
+                        <div class="pin-indicator reserved"></div>
+                        <span class="pin-label">ID_SC</span>
+                        <span class="pin-number">28</span>
+                    </div>
+                    <!-- Pin 30 -->
+                    <div class="pin ground" data-pin="30">
+                        <div class="pin-indicator ground"></div>
+                        <span class="pin-label">GND</span>
+                        <span class="pin-number">30</span>
+                    </div>
+                    <!-- Pin 32 -->
+                    <div class="pin gpio" data-pin="32">
+                        <div class="pin-indicator"></div>
+                        <span class="pin-label">GPIO12</span>
+                        <span class="pin-number">32</span>
+                    </div>
+                    <!-- Pin 34 -->
+                    <div class="pin ground" data-pin="34">
+                        <div class="pin-indicator ground"></div>
+                        <span class="pin-label">GND</span>
+                        <span class="pin-number">34</span>
+                    </div>
+                    <!-- Pin 36 -->
+                    <div class="pin gpio" data-pin="36">
+                        <div class="pin-indicator"></div>
+                        <span class="pin-label">GPIO16</span>
+                        <span class="pin-number">36</span>
+                    </div>
+                    <!-- Pin 38 -->
+                    <div class="pin gpio" data-pin="38">
+                        <div class="pin-indicator"></div>
+                        <span class="pin-label">GPIO20</span>
+                        <span class="pin-number">38</span>
+                    </div>
+                    <!-- Pin 40 -->
+                    <div class="pin gpio" data-pin="40">
+                        <div class="pin-indicator"></div>
+                        <span class="pin-label">GPIO21</span>
+                        <span class="pin-number">40</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div id="control-panel" class="control-panel">
+            <h2>Pin Control</h2>
+            <p>Click a GPIO pin above to configure it</p>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
