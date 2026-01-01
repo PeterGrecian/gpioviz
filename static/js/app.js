@@ -5,6 +5,7 @@ let currentPin = null;
 let pinStates = {};
 let flashIntervals = {};
 let flashToolActive = false;
+let configToolActive = false;
 let globalFlashSpeed = 500;
 let currentLayout = '2x20';
 
@@ -21,6 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeEventListeners() {
     // Reset all button
     document.getElementById('reset-all').addEventListener('click', resetAll);
+
+    // Config tool button
+    document.getElementById('config-tool').addEventListener('click', toggleConfigTool);
 
     // Flash tool button
     document.getElementById('flash-tool').addEventListener('click', toggleFlashTool);
@@ -42,6 +46,8 @@ function initializeEventListeners() {
                 e.stopPropagation();
                 if (flashToolActive) {
                     activateFlashOnPin(pin);
+                } else if (configToolActive) {
+                    togglePinMode(pin);
                 } else {
                     togglePinState(pin);
                 }
@@ -76,7 +82,7 @@ function updateUI() {
     GPIO_PINS.forEach(pin => {
         const pinElement = document.querySelector(`.pin[data-pin="${pin}"]`);
         const indicator = pinElement.querySelector('.pin-indicator');
-        const modeContainer = pinElement.querySelector('.pin-mode');
+        const modeIndicator = pinElement.querySelector('.pin-mode-indicator');
 
         if (pinStates[pin]) {
             const state = pinStates[pin];
@@ -96,13 +102,15 @@ function updateUI() {
                 indicator.classList.remove('active');
             }
 
-            // Update radio buttons
-            const inRadio = modeContainer.querySelector(`input[value="IN"]`);
-            const outRadio = modeContainer.querySelector(`input[value="OUT"]`);
-            if (state.mode === 'IN') {
-                inRadio.checked = true;
-            } else {
-                outRadio.checked = true;
+            // Update mode indicator
+            if (modeIndicator) {
+                if (state.mode === 'IN') {
+                    modeIndicator.classList.remove('output-mode');
+                    modeIndicator.classList.add('input-mode');
+                } else {
+                    modeIndicator.classList.remove('input-mode');
+                    modeIndicator.classList.add('output-mode');
+                }
             }
         }
     });
@@ -169,9 +177,32 @@ function showControlPanel(pin) {
     `;
 }
 
+function toggleConfigTool() {
+    configToolActive = !configToolActive;
+    const button = document.getElementById('config-tool');
+
+    // Deactivate flash tool if active
+    if (configToolActive && flashToolActive) {
+        toggleFlashTool();
+    }
+
+    if (configToolActive) {
+        button.classList.add('active');
+        document.body.classList.add('config-tool-active');
+    } else {
+        button.classList.remove('active');
+        document.body.classList.remove('config-tool-active');
+    }
+}
+
 function toggleFlashTool() {
     flashToolActive = !flashToolActive;
     const button = document.getElementById('flash-tool');
+
+    // Deactivate config tool if active
+    if (flashToolActive && configToolActive) {
+        toggleConfigTool();
+    }
 
     if (flashToolActive) {
         button.classList.add('active');
@@ -180,6 +211,15 @@ function toggleFlashTool() {
         button.classList.remove('active');
         document.body.classList.remove('flash-tool-active');
     }
+}
+
+async function togglePinMode(pin) {
+    const state = pinStates[pin];
+    if (!state) return;
+
+    // Toggle between IN and OUT
+    const newMode = state.mode === 'OUT' ? 'IN' : 'OUT';
+    await setMode(pin, newMode);
 }
 
 async function activateFlashOnPin(pin) {

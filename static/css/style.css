@@ -121,12 +121,35 @@ header h1 {
     box-shadow: 0 0 10px #f39c12, inset 0 2px 4px rgba(0,0,0,0.3);
 }
 
+.btn-config-tool {
+    background-color: #9b59b6;
+    color: white;
+    position: relative;
+}
+
+.btn-config-tool:hover {
+    background-color: #8e44ad;
+}
+
+.btn-config-tool.active {
+    background-color: #8e44ad;
+    box-shadow: 0 0 10px #9b59b6, inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
 body.flash-tool-active {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚡</text></svg>') 12 12, auto;
 }
 
 body.flash-tool-active .pin-indicator {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚡</text></svg>') 12 12, pointer;
+}
+
+body.config-tool-active {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚙</text></svg>') 12 12, auto;
+}
+
+body.config-tool-active .pin-indicator {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚙</text></svg>') 12 12, pointer;
 }
 
 .main-content {
@@ -235,26 +258,25 @@ body.flash-tool-active .pin-indicator {
     margin: 0 6px;
 }
 
-.pin-mode {
-    display: flex;
-    gap: 3px;
+.pin-mode-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    border: 2px solid #7f8c8d;
+    background: #ecf0f1;
     margin: 0 4px;
 }
 
-.pin-mode label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 10px;
-    font-weight: bold;
-    color: #7f8c8d;
+.pin-mode-indicator.output-mode {
+    border-radius: 50%;
+    background: #3498db;
+    border-color: #2980b9;
 }
 
-.pin-mode input[type="radio"] {
-    margin: 0 2px 0 0;
-    width: 10px;
-    height: 10px;
-    cursor: pointer;
+.pin-mode-indicator.input-mode {
+    border-radius: 2px;
+    background: #e67e22;
+    border-color: #d35400;
 }
 
 .pin-indicator {
