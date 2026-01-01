@@ -1,0 +1,205 @@
+{
+  "header_type": "40-pin GPIO header",
+  "pinout": [
+    {
+      "physical_pin": 1,
+      "bcm_gpio": null,
+      "function": "3.3V Power"
+    },
+    {
+      "physical_pin": 2,
+      "bcm_gpio": null,
+      "function": "5V Power"
+    },
+    {
+      "physical_pin": 3,
+      "bcm_gpio": 2,
+      "function": "GPIO 2 (I2C1 SDA)"
+    },
+    {
+      "physical_pin": 4,
+      "bcm_gpio": null,
+      "function": "5V Power"
+    },
+    {
+      "physical_pin": 5,
+      "bcm_gpio": 3,
+      "function": "GPIO 3 (I2C1 SCL)"
+    },
+    {
+      "physical_pin": 6,
+      "bcm_gpio": null,
+      "function": "Ground"
+    },
+    {
+      "physical_pin": 7,
+      "bcm_gpio": 4,
+      "function": "GPIO 4 (GPCLK0)"
+    },
+    {
+      "physical_pin": 8,
+      "bcm_gpio": 14,
+      "function": "GPIO 14 (UART0 TX)"
+    },
+    {
+      "physical_pin": 9,
+      "bcm_gpio": null,
+      "function": "Ground"
+    },
+    {
+      "physical_pin": 10,
+      "bcm_gpio": 15,
+      "function": "GPIO 15 (UART0 RX)"
+    },
+    {
+      "physical_pin": 11,
+      "bcm_gpio": 17,
+      "function": "GPIO 17"
+    },
+    {
+      "physical_pin": 12,
+      "bcm_gpio": 18,
+      "function": "GPIO 18 (PWM0 SCLK)"
+    },
+    {
+      "physical_pin": 13,
+      "bcm_gpio": 27,
+      "function": "GPIO 27"
+    },
+    {
+      "physical_pin": 14,
+      "bcm_gpio": null,
+      "function": "Ground"
+    },
+    {
+      "physical_pin": 15,
+      "bcm_gpio": 22,
+      "function": "GPIO 22"
+    },
+    {
+      "physical_pin": 16,
+      "bcm_gpio": 23,
+      "function": "GPIO 23"
+    },
+    {
+      "physical_pin": 17,
+      "bcm_gpio": null,
+      "function": "3.3V Power"
+    },
+    {
+      "physical_pin": 18,
+      "bcm_gpio": 24,
+      "function": "GPIO 24"
+    },
+    {
+      "physical_pin": 19,
+      "bcm_gpio": 10,
+      "function": "GPIO 10 (SPI0 MOSI)"
+    },
+    {
+      "physical_pin": 20,
+      "bcm_gpio": null,
+      "function": "Ground"
+    },
+    {
+      "physical_pin": 21,
+      "bcm_gpio": 9,
+      "function": "GPIO 9 (SPI0 MISO)"
+    },
+    {
+      "physical_pin": 22,
+      "bcm_gpio": 25,
+      "function": "GPIO 25"
+    },
+    {
+      "physical_pin": 23,
+      "bcm_gpio": 11,
+      "function": "GPIO 11 (SPI0 SCLK)"
+    },
+    {
+      "physical_pin": 24,
+      "bcm_gpio": 8,
+      "function": "GPIO 8 (SPI0 CE0)"
+    },
+    {
+      "physical_pin": 25,
+      "bcm_gpio": null,
+      "function": "Ground"
+    },
+    {
+      "physical_pin": 26,
+      "bcm_gpio": 7,
+      "function": "GPIO 7 (SPI0 CE1)"
+    },
+    {
+      "physical_pin": 27,
+      "bcm_gpio": 0,
+      "function": "GPIO 0 (I2C0 SDA)"
+    },
+    {
+      "physical_pin": 28,
+      "bcm_gpio": 1,
+      "function": "GPIO 1 (I2C0 SCL)"
+    },
+    {
+      "physical_pin": 29,
+      "bcm_gpio": 5,
+      "function": "GPIO 5"
+    },
+    {
+      "physical_pin": 30,
+      "bcm_gpio": null,
+      "function": "Ground"
+    },
+    {
+      "physical_pin": 31,
+      "bcm_gpio": 6,
+      "function": "GPIO 6"
+    },
+    {
+      "physical_pin": 32,
+      "bcm_gpio": 12,
+      "function": "GPIO 12 (PWM0)"
+    },
+    {
+      "physical_pin": 33,
+      "bcm_gpio": 13,
+      "function": "GPIO 13 (PWM1)"
+    },
+    {
+      "physical_pin": 34,
+      "bcm_gpio": null,
+      "function": "Ground"
+    },
+    {
+      "physical_pin": 35,
+      "bcm_gpio": 19,
+      "function": "GPIO 19 (PWM1 MOSI)"
+    },
+    {
+      "physical_pin": 36,
+      "bcm_gpio": 16,
+      "function": "GPIO 16"
+    },
+    {
+      "physical_pin": 37,
+      "bcm_gpio": 26,
+      "function": "GPIO 26"
+    },
+    {
+      "physical_pin": 38,
+      "bcm_gpio": 20,
+      "function": "GPIO 20 (SPI1 MISO)"
+    },
+    {
+      "physical_pin": 39,
+      "bcm_gpio": null,
+      "function": "Ground"
+    },
+    {
+      "physical_pin": 40,
+      "bcm_gpio": 21,
+      "function": "GPIO 21 (SPI1 SCLK)"
+    }
+  ]
+}
