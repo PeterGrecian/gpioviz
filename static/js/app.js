@@ -9,6 +9,8 @@ let configToolActive = false;
 let currentLayout = 'hat';
 let originalHTML = null;
 const FLASH_SPEED = 500; // Fixed flash speed in ms
+let testSequenceRunning = false;
+let testSequenceAbort = false;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -48,6 +50,9 @@ function initializeEventListeners() {
 
     // Flash tool button
     document.getElementById('flash-tool').addEventListener('click', toggleFlashTool);
+
+    // Test sequence button
+    document.getElementById('test-sequence').addEventListener('click', toggleTestSequence);
 
     // Layout toggle buttons
     document.getElementById('btn-hat-mode').addEventListener('click', () => setLayout('hat'));
@@ -441,6 +446,60 @@ function setLayout(layout) {
     }
 }
 
+async function toggleTestSequence() {
+    if (testSequenceRunning) {
+        // Stop the test sequence
+        testSequenceAbort = true;
+        return;
+    }
+
+    testSequenceRunning = true;
+    testSequenceAbort = false;
+    const button = document.getElementById('test-sequence');
+    button.textContent = '⏹ Stop Test';
+    button.classList.add('active');
+
+    // Get pin order based on current layout
+    let pinOrder = [];
+    if (currentLayout === 'hat') {
+        // Hat mode: row by row, left to right
+        const hatLayout = [
+            [17, 11, 12, 19, 21, 23, 24, 26],
+            [1, 8, 10, 18, 22, 29, 31, 36],
+            [2, 16, 15, 27, 28, 32, 38, 35],
+            [4, 3, 5, 7, 13, 40, 33, 37]
+        ];
+        for (let row of hatLayout) {
+            for (let pin of row) {
+                if (GPIO_PINS.includes(pin)) {
+                    pinOrder.push(pin);
+                }
+            }
+        }
+    } else {
+        // Header mode: odd pins then even pins, top to bottom
+        pinOrder = GPIO_PINS.slice().sort((a, b) => a - b);
+    }
+
+    // Flash each pin in sequence
+    for (let pin of pinOrder) {
+        if (testSequenceAbort) break;
+
+        // Set to output mode and flash briefly
+        await setMode(pin, 'OUT');
+        await setPin(pin, 1);
+        await new Promise(resolve => setTimeout(resolve, 300));
+        await setPin(pin, 0);
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    // Reset state
+    testSequenceRunning = false;
+    testSequenceAbort = false;
+    button.textContent = '▶ Test Sequence';
+    button.classList.remove('active');
+}
+
 async function resetAll() {
     if (confirm('Reset all pins to LOW output?')) {
         try {
@@ -451,12 +510,6 @@ async function resetAll() {
             const data = await response.json();
             if (data.success) {
                 await loadPinStates();
-
-                const controlPanel = document.getElementById('control-panel');
-                controlPanel.innerHTML = `
-                    <h2>Pin Control</h2>
-                    <p>All pins have been reset. Click a GPIO pin to configure it.</p>
-                `;
             }
         } catch (error) {
             console.error('Error resetting pins:', error);
