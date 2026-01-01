@@ -10,7 +10,15 @@
     <div class="container">
         <header>
             <h1>Raspberry Pi Zero GPIO Control</h1>
-            <button id="reset-all" class="btn btn-danger">Reset All Pins</button>
+            <div class="header-controls">
+                <div class="global-flash-control">
+                    <label>Flash:</label>
+                    <input type="range" id="global-flash-speed" min="100" max="2000" step="100" value="500">
+                    <span class="speed-display" id="global-speed-display">500ms</span>
+                </div>
+                <button id="flash-tool" class="btn btn-flash-tool">⚡ Flash Tool</button>
+                <button id="reset-all" class="btn btn-danger">Reset All</button>
+            </div>
         </header>
 
         <div class="main-content">

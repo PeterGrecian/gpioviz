@@ -4,6 +4,8 @@ const GPIO_PINS = [3, 5, 7, 8, 10, 11, 12, 13, 15, 16, 18, 19, 21, 22, 23, 24, 2
 let currentPin = null;
 let pinStates = {};
 let flashIntervals = {};
+let flashToolActive = false;
+let globalFlashSpeed = 500;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,6 +18,16 @@ function initializeEventListeners() {
     // Reset all button
     document.getElementById('reset-all').addEventListener('click', resetAll);
 
+    // Flash tool button
+    document.getElementById('flash-tool').addEventListener('click', toggleFlashTool);
+
+    // Global flash speed slider
+    const globalSlider = document.getElementById('global-flash-speed');
+    globalSlider.addEventListener('input', (e) => {
+        globalFlashSpeed = parseInt(e.target.value);
+        document.getElementById('global-speed-display').textContent = globalFlashSpeed + 'ms';
+    });
+
     // Add click listeners to GPIO pin indicators
     GPIO_PINS.forEach(pin => {
         const pinElement = document.querySelector(`.pin[data-pin="${pin}"]`);
@@ -24,7 +36,11 @@ function initializeEventListeners() {
         if (indicator) {
             indicator.addEventListener('click', (e) => {
                 e.stopPropagation();
-                togglePinState(pin);
+                if (flashToolActive) {
+                    activateFlashOnPin(pin);
+                } else {
+                    togglePinState(pin);
+                }
             });
         }
     });
@@ -61,7 +77,14 @@ function updateUI() {
         if (pinStates[pin]) {
             const state = pinStates[pin];
 
-            // Update indicator
+            // Update indicator shape based on mode
+            if (state.mode === 'IN') {
+                indicator.classList.add('input-mode');
+            } else {
+                indicator.classList.remove('input-mode');
+            }
+
+            // Update indicator state
             if (state.flashing) {
                 indicator.classList.add('flashing');
                 indicator.classList.remove('active');
@@ -145,6 +168,32 @@ function showControlPanel(pin) {
     `;
 }
 
+function toggleFlashTool() {
+    flashToolActive = !flashToolActive;
+    const button = document.getElementById('flash-tool');
+
+    if (flashToolActive) {
+        button.classList.add('active');
+        document.body.classList.add('flash-tool-active');
+    } else {
+        button.classList.remove('active');
+        document.body.classList.remove('flash-tool-active');
+    }
+}
+
+async function activateFlashOnPin(pin) {
+    const state = pinStates[pin];
+    if (!state) return;
+
+    // Set to output mode if not already
+    if (state.mode !== 'OUT') {
+        await setMode(pin, 'OUT');
+    }
+
+    // Toggle flashing with global flash speed
+    await toggleFlash(pin, !state.flashing);
+}
+
 async function togglePinState(pin) {
     const state = pinStates[pin];
     if (!state) return;
@@ -194,10 +243,12 @@ async function setPin(pin, state) {
     }
 }
 
-async function toggleFlash(pin) {
+async function toggleFlash(pin, enabled = null) {
     const state = pinStates[pin];
-    const enabled = !state.flashing;
-    const speed = state.flash_speed || 500;
+    if (enabled === null) {
+        enabled = !state.flashing;
+    }
+    const speed = globalFlashSpeed;
 
     try {
         const response = await fetch(`/api/pin/${pin}/flash`, {
@@ -211,7 +262,9 @@ async function toggleFlash(pin) {
         const data = await response.json();
         if (data.success) {
             await loadPinStates();
-            showControlPanel(pin);
+            if (currentPin === pin) {
+                showControlPanel(pin);
+            }
         }
     } catch (error) {
         console.error('Error toggling flash:', error);

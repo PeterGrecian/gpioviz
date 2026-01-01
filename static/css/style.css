@@ -24,12 +24,44 @@ header {
     margin-bottom: 15px;
     color: white;
     padding: 0 10px;
+    gap: 15px;
 }
 
 header h1 {
     font-size: 1.8em;
     margin: 0;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    flex: 1;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.global-flash-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.1);
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.global-flash-control label {
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.global-flash-control input[type="range"] {
+    width: 120px;
+}
+
+.global-flash-control .speed-display {
+    font-size: 11px;
+    min-width: 50px;
+    text-align: right;
 }
 
 .btn {
@@ -72,6 +104,29 @@ header h1 {
 
 .btn-success:hover {
     background-color: #27ae60;
+}
+
+.btn-flash-tool {
+    background-color: #f39c12;
+    color: white;
+    position: relative;
+}
+
+.btn-flash-tool:hover {
+    background-color: #e67e22;
+}
+
+.btn-flash-tool.active {
+    background-color: #e67e22;
+    box-shadow: 0 0 10px #f39c12, inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
+body.flash-tool-active {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚡</text></svg>') 12 12, auto;
+}
+
+body.flash-tool-active .pin-indicator {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚡</text></svg>') 12 12, pointer;
 }
 
 .main-content {
@@ -183,6 +238,10 @@ header h1 {
     border: 2px solid #34495e;
     transition: all 0.3s ease;
     cursor: pointer;
+}
+
+.pin-indicator.input-mode {
+    border-radius: 2px;
 }
 
 .pin-indicator:hover {
