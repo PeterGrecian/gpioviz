@@ -282,8 +282,8 @@ body.flash-tool-active .pin-indicator {
 }
 
 .pin-indicator.power {
-    background: #e91e63;
-    border-color: #c2185b;
+    background: #ff99cc;
+    border-color: #ff66b2;
 }
 
 .pin-indicator.power-5v {
