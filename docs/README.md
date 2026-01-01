@@ -30,7 +30,7 @@ Many pins have secondary functions (I2C, SPI, UART) that are only active if enab
 
 ### Important Exceptions and Cautions
 
-**ID_SD and ID_SC (Pins 27 & 28):**
+**ID_SD and ID_SC (Pins 27 & 28, turquoise LEDs on HAT):**
 - Reserved for HAT EEPROM communication during boot
 - Can be used as GPIO (BCM 0 and 1) by disabling EEPROM check in /boot/config.txt
 - **Not recommended** to avoid hardware identification conflicts
