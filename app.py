@@ -302,6 +302,7 @@ def toggle_peripheral(pin):
         new_mode = available_modes[0]
 
     # Attempt to enable/disable peripheral at runtime using dtparam
+    # Note: App should be run as sudo, so we don't need sudo in subprocess calls
     try:
         if new_mode == 'GPIO':
             # Disable all peripherals for this pin (return to GPIO mode)
@@ -310,18 +311,23 @@ def toggle_peripheral(pin):
             pass
         elif 'I2C' in new_mode:
             # Enable I2C at runtime
-            subprocess.run(['sudo', 'dtparam', 'i2c_arm=on'], check=True)
-            subprocess.run(['sudo', 'modprobe', 'i2c-dev'], check=False)
-            subprocess.run(['sudo', 'modprobe', 'i2c-bcm2835'], check=False)
+            subprocess.run(['dtparam', 'i2c_arm=on'], check=True, capture_output=True)
+            subprocess.run(['modprobe', 'i2c-dev'], check=False, capture_output=True)
+            subprocess.run(['modprobe', 'i2c-bcm2835'], check=False, capture_output=True)
+            print(f"Enabled I2C for pin {pin}")
         elif 'SPI' in new_mode:
             # Enable SPI at runtime
-            subprocess.run(['sudo', 'dtparam', 'spi=on'], check=True)
+            subprocess.run(['dtparam', 'spi=on'], check=True, capture_output=True)
+            print(f"Enabled SPI for pin {pin}")
         elif 'UART' in new_mode:
             # UART enabling is more complex, may require reboot
             pass
         # PWM and PCM can be controlled via software without dtparam
+    except subprocess.CalledProcessError as e:
+        print(f"Warning: Could not enable {new_mode} for pin {pin}: {e.stderr.decode() if e.stderr else str(e)}")
+        # Continue anyway - show the mode even if activation failed
     except Exception as e:
-        print(f"Warning: Could not enable {new_mode}: {e}")
+        print(f"Warning: Could not enable {new_mode} for pin {pin}: {e}")
         # Continue anyway - show the mode even if activation failed
 
     pin_states[pin]['peripheral_mode'] = new_mode
