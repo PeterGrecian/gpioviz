@@ -33,66 +33,45 @@ flash_threads = {}
 clock_running = False
 clock_thread = None
 
-# 7-segment display patterns for digits 0-9
-# Segments: A=top, B=top-right, C=bottom-right, D=bottom, E=bottom-left, F=top-left, G=middle, DP=decimal point
-# Each pattern lists which segments should be lit (indices into segment array)
-SEGMENT_PATTERNS = {
-    0: [0, 1, 2, 3, 4, 5],       # A, B, C, D, E, F (all except G)
-    1: [1, 2],                    # B, C (right side)
-    2: [0, 1, 6, 4, 3],          # A, B, G, E, D
-    3: [0, 1, 6, 2, 3],          # A, B, G, C, D
-    4: [5, 6, 1, 2],             # F, G, B, C
-    5: [0, 5, 6, 2, 3],          # A, F, G, C, D
-    6: [0, 5, 6, 4, 3, 2],       # A, F, G, E, D, C
-    7: [0, 1, 2],                 # A, B, C (top and right)
-    8: [0, 1, 2, 3, 4, 5, 6],    # All segments
-    9: [0, 1, 2, 3, 5, 6]        # All except E
-}
+# HAT mode clock display using 12 positions on each side
+# Right 3 columns (5,6,7) = 12 LEDs for seconds (each LED = 5 second interval)
+# Columns 1-3 = 12 LEDs for tens of seconds (each LED = 10 second interval)
 
-# Pin assignments for 7-segment display
-# Tens digit uses left pins, ones digit uses right pins
-SEGMENT_PINS = {
-    'tens': {
-        0: 3,   # Segment A (top)
-        1: 5,   # Segment B (top-right)
-        2: 7,   # Segment C (bottom-right)
-        3: 11,  # Segment D (bottom)
-        4: 13,  # Segment E (bottom-left)
-        5: 15,  # Segment F (top-left)
-        6: 16,  # Segment G (middle)
-        7: 8    # Segment DP (decimal point)
-    },
-    'ones': {
-        0: 19,  # Segment A (top)
-        1: 21,  # Segment B (top-right)
-        2: 23,  # Segment C (bottom-right)
-        3: 24,  # Segment D (bottom)
-        4: 26,  # Segment E (bottom-left)
-        5: 29,  # Segment F (top-left)
-        6: 31,  # Segment G (middle)
-        7: 22   # Segment DP (decimal point)
-    }
-}
+# HAT layout columns (from JS):
+# Row 0: [17, 11, 12, 19, 21, 23, 24, 26]
+# Row 1: [1,  8,  10, 18, 22, 29, 31, 36]
+# Row 2: [2,  16, 15, 27, 28, 32, 38, 35]
+# Row 3: [4,  3,  5,  7,  13, 40, 33, 37]
+#        C0  C1  C2  C3  C4  C5  C6  C7
+
+# Right 3 columns (C5, C6, C7) - for seconds display (12 positions)
+SECONDS_PINS = [
+    23, 24, 26,  # Row 0, columns 5-7
+    29, 31, 36,  # Row 1, columns 5-7
+    32, 38, 35,  # Row 2, columns 5-7
+    40, 33, 37   # Row 3, columns 5-7
+]
+
+# Columns 1-3 (C1, C2, C3) - for tens of seconds display (12 positions, use first 6)
+TENS_PINS = [
+    11, 12, 19,  # Row 0, columns 1-3
+    8,  10, 18,  # Row 1, columns 1-3
+    16, 15, 27,  # Row 2, columns 1-3 (27 is reserved but we'll include it)
+    3,  5,  7    # Row 3, columns 1-3
+]
 
 def get_all_clock_pins():
     """Get all pins used by the clock display"""
-    pins = []
-    for digit_pins in SEGMENT_PINS.values():
-        pins.extend(digit_pins.values())
-    return pins
+    return SECONDS_PINS + TENS_PINS
 
 def clock_display_thread():
-    """Thread function to display seconds on GPIO LEDs using 7-segment display"""
+    """Thread function to display seconds on GPIO LEDs using 12-position clock face"""
     global clock_running, pin_changes
 
     while clock_running:
         # Get current seconds (0-59)
         now = datetime.now()
         seconds = now.second
-
-        # Extract digits
-        tens_digit = seconds // 10
-        ones_digit = seconds % 10
 
         # Turn off all clock pins first
         all_clock_pins = get_all_clock_pins()
@@ -102,20 +81,26 @@ def clock_display_thread():
                 GPIO.output(pin, GPIO.LOW)
                 pin_states[pin]['state'] = 0
 
-        # Display tens digit
-        tens_pattern = SEGMENT_PATTERNS.get(tens_digit, [])
-        for segment_index in tens_pattern:
-            pin = SEGMENT_PINS['tens'].get(segment_index)
-            if pin and pin in GPIO_PINS:
+        # Calculate which position to light up for seconds (0-11, each represents 5 seconds)
+        # 0-4 sec = position 0, 5-9 sec = position 1, etc.
+        seconds_position = seconds // 5
+
+        # Calculate which position to light up for tens (0-5, each represents 10 seconds)
+        # 0-9 sec = position 0, 10-19 sec = position 1, etc.
+        tens_position = seconds // 10
+
+        # Light up the appropriate LED for seconds (right side)
+        if 0 <= seconds_position < len(SECONDS_PINS):
+            pin = SECONDS_PINS[seconds_position]
+            if pin in GPIO_PINS:
                 ensure_pin_setup(pin, 'OUT')
                 GPIO.output(pin, GPIO.HIGH)
                 pin_states[pin]['state'] = 1
 
-        # Display ones digit
-        ones_pattern = SEGMENT_PATTERNS.get(ones_digit, [])
-        for segment_index in ones_pattern:
-            pin = SEGMENT_PINS['ones'].get(segment_index)
-            if pin and pin in GPIO_PINS:
+        # Light up the appropriate LED for tens (left side)
+        if 0 <= tens_position < len(TENS_PINS):
+            pin = TENS_PINS[tens_position]
+            if pin in GPIO_PINS:
                 ensure_pin_setup(pin, 'OUT')
                 GPIO.output(pin, GPIO.HIGH)
                 pin_states[pin]['state'] = 1
