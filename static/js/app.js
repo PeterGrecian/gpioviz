@@ -87,23 +87,32 @@ function initializeEventListeners() {
         pinElements.forEach(pinElement => {
             const indicator = pinElement.querySelector('.pin-indicator');
 
-            // Click handler for the whole pin cell (for mode tools)
+            // Click handler for the whole pin cell
             pinElement.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (peripheralToolActive) {
-                    togglePeripheralMode(pin);
-                } else if (flashToolActive) {
-                    activateFlashOnPin(pin);
-                } else if (configToolActive) {
-                    togglePinMode(pin);
+                // Only handle if click is on cell but not on indicator (unless mode tool active)
+                if (e.target !== indicator || peripheralToolActive || flashToolActive || configToolActive) {
+                    e.stopPropagation();
+                    if (peripheralToolActive) {
+                        togglePeripheralMode(pin);
+                    } else if (flashToolActive) {
+                        activateFlashOnPin(pin);
+                    } else if (configToolActive) {
+                        togglePinMode(pin);
+                    }
                 }
             });
 
-            // Click handler for the indicator (when no mode tool active)
+            // Click handler for the indicator
             if (indicator) {
                 indicator.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (!peripheralToolActive && !flashToolActive && !configToolActive) {
+                    if (peripheralToolActive) {
+                        togglePeripheralMode(pin);
+                    } else if (flashToolActive) {
+                        activateFlashOnPin(pin);
+                    } else if (configToolActive) {
+                        togglePinMode(pin);
+                    } else {
                         togglePinState(pin);
                     }
                 });
