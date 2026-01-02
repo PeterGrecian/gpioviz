@@ -33,99 +33,92 @@ flash_threads = {}
 clock_running = False
 clock_thread = None
 
-# Clock digit patterns - using a subset of pins to display digits 0-9
-# Each digit uses a pattern of pins to create a recognizable shape
-# Using simplified 7-segment style mapping
-DIGIT_PATTERNS = {
-    0: [11, 12, 19, 21, 23, 24, 26],  # Pattern for 0
-    1: [12, 19],                       # Pattern for 1
-    2: [11, 12, 8, 23, 24],           # Pattern for 2
-    3: [11, 12, 8, 21, 26],           # Pattern for 3
-    4: [19, 8, 12, 21],               # Pattern for 4
-    5: [11, 23, 8, 21, 26],           # Pattern for 5
-    6: [11, 23, 24, 26, 21, 8],       # Pattern for 6
-    7: [11, 12, 19],                  # Pattern for 7
-    8: [11, 12, 19, 21, 23, 24, 26, 8], # Pattern for 8
-    9: [11, 12, 19, 21, 8, 26]        # Pattern for 9
+# 7-segment display patterns for digits 0-9
+# Segments: A=top, B=top-right, C=bottom-right, D=bottom, E=bottom-left, F=top-left, G=middle, DP=decimal point
+# Each pattern lists which segments should be lit (indices into segment array)
+SEGMENT_PATTERNS = {
+    0: [0, 1, 2, 3, 4, 5],       # A, B, C, D, E, F (all except G)
+    1: [1, 2],                    # B, C (right side)
+    2: [0, 1, 6, 4, 3],          # A, B, G, E, D
+    3: [0, 1, 6, 2, 3],          # A, B, G, C, D
+    4: [5, 6, 1, 2],             # F, G, B, C
+    5: [0, 5, 6, 2, 3],          # A, F, G, C, D
+    6: [0, 5, 6, 4, 3, 2],       # A, F, G, E, D, C
+    7: [0, 1, 2],                 # A, B, C (top and right)
+    8: [0, 1, 2, 3, 4, 5, 6],    # All segments
+    9: [0, 1, 2, 3, 5, 6]        # All except E
 }
 
-# Pin positions for each digit in HH:MM display
-# Digit 1 (Hour tens), Digit 2 (Hour ones), Digit 3 (Minute tens), Digit 4 (Minute ones)
-DIGIT_POSITIONS = {
-    0: {  # Hour tens - using leftmost pins
-        'offset_pins': [3, 5, 7, 11, 13, 15, 16, 8]
+# Pin assignments for 7-segment display
+# Tens digit uses left pins, ones digit uses right pins
+SEGMENT_PINS = {
+    'tens': {
+        0: 3,   # Segment A (top)
+        1: 5,   # Segment B (top-right)
+        2: 7,   # Segment C (bottom-right)
+        3: 11,  # Segment D (bottom)
+        4: 13,  # Segment E (bottom-left)
+        5: 15,  # Segment F (top-left)
+        6: 16,  # Segment G (middle)
+        7: 8    # Segment DP (decimal point)
     },
-    1: {  # Hour ones - using left-center pins
-        'offset_pins': [10, 12, 18, 22, 29, 31, 32, 36]
-    },
-    2: {  # Minute tens - using right-center pins
-        'offset_pins': [19, 21, 23, 24, 26, 35, 38, 40]
-    },
-    3: {  # Minute ones - using rightmost pins
-        'offset_pins': [33, 37, 15, 22, 32, 35, 38, 40]
+    'ones': {
+        0: 19,  # Segment A (top)
+        1: 21,  # Segment B (top-right)
+        2: 23,  # Segment C (bottom-right)
+        3: 24,  # Segment D (bottom)
+        4: 26,  # Segment E (bottom-left)
+        5: 29,  # Segment F (top-left)
+        6: 31,  # Segment G (middle)
+        7: 22   # Segment DP (decimal point)
     }
 }
 
-def display_digit_on_pins(digit, position):
-    """Light up pins to display a digit at a specific position"""
-    pattern = DIGIT_PATTERNS.get(digit, [])
-    pin_map = DIGIT_POSITIONS.get(position, {}).get('offset_pins', [])
-
-    # Use first N pins from the position's pin map, where N is the pattern length
-    active_pins = []
-    for i, segment_active in enumerate(range(len(pattern))):
-        if i < len(pin_map) and segment_active < len(pattern):
-            # Map pattern index to actual pin
-            if segment_active < len(pin_map):
-                active_pins.append(pin_map[i])
-
-    return active_pins
+def get_all_clock_pins():
+    """Get all pins used by the clock display"""
+    pins = []
+    for digit_pins in SEGMENT_PINS.values():
+        pins.extend(digit_pins.values())
+    return pins
 
 def clock_display_thread():
-    """Thread function to display clock on GPIO LEDs"""
+    """Thread function to display seconds on GPIO LEDs using 7-segment display"""
     global clock_running, pin_changes
 
     while clock_running:
-        # Get current time
+        # Get current seconds (0-59)
         now = datetime.now()
-        hour = now.hour
-        minute = now.minute
+        seconds = now.second
 
         # Extract digits
-        h_tens = hour // 10
-        h_ones = hour % 10
-        m_tens = minute // 10
-        m_ones = minute % 10
+        tens_digit = seconds // 10
+        ones_digit = seconds % 10
 
-        # Turn off all GPIO pins first
-        all_clock_pins = []
-        for pos_data in DIGIT_POSITIONS.values():
-            all_clock_pins.extend(pos_data['offset_pins'])
-
-        for pin in GPIO_PINS.keys():
-            if pin in all_clock_pins:
+        # Turn off all clock pins first
+        all_clock_pins = get_all_clock_pins()
+        for pin in all_clock_pins:
+            if pin in GPIO_PINS:
                 ensure_pin_setup(pin, 'OUT')
                 GPIO.output(pin, GPIO.LOW)
                 pin_states[pin]['state'] = 0
 
-        # Light up pins for each digit using a simple binary representation
-        # This is simpler and more reliable than complex patterns
-        digits = [h_tens, h_ones, m_tens, m_ones]
+        # Display tens digit
+        tens_pattern = SEGMENT_PATTERNS.get(tens_digit, [])
+        for segment_index in tens_pattern:
+            pin = SEGMENT_PINS['tens'].get(segment_index)
+            if pin and pin in GPIO_PINS:
+                ensure_pin_setup(pin, 'OUT')
+                GPIO.output(pin, GPIO.HIGH)
+                pin_states[pin]['state'] = 1
 
-        for digit_pos, digit_value in enumerate(digits):
-            pin_list = DIGIT_POSITIONS.get(digit_pos, {}).get('offset_pins', [])
-            # Use binary representation: each digit uses 4 LEDs to show binary value
-            for bit_pos in range(4):
-                if bit_pos < len(pin_list):
-                    pin = pin_list[bit_pos]
-                    if pin in GPIO_PINS:
-                        # Check if this bit is set in the digit value
-                        bit_value = (digit_value >> bit_pos) & 1
-                        ensure_pin_setup(pin, 'OUT')
-                        GPIO.output(pin, GPIO.HIGH if bit_value else GPIO.LOW)
-                        pin_states[pin]['state'] = bit_value
-                        if bit_value:
-                            pin_changes += 1
+        # Display ones digit
+        ones_pattern = SEGMENT_PATTERNS.get(ones_digit, [])
+        for segment_index in ones_pattern:
+            pin = SEGMENT_PINS['ones'].get(segment_index)
+            if pin and pin in GPIO_PINS:
+                ensure_pin_setup(pin, 'OUT')
+                GPIO.output(pin, GPIO.HIGH)
+                pin_states[pin]['state'] = 1
 
         # Update every second
         time.sleep(1)
@@ -522,12 +515,10 @@ def toggle_clock():
             clock_thread = None
 
         # Turn off all clock pins
-        all_clock_pins = []
-        for pos_data in DIGIT_POSITIONS.values():
-            all_clock_pins.extend(pos_data['offset_pins'])
+        all_clock_pins = get_all_clock_pins()
 
-        for pin in GPIO_PINS.keys():
-            if pin in all_clock_pins:
+        for pin in all_clock_pins:
+            if pin in GPIO_PINS:
                 # Stop any flashing first
                 if pin_states[pin].get('flashing', False):
                     flashing_pins[pin] = False
@@ -543,9 +534,7 @@ def toggle_clock():
     else:
         # Start the clock
         # First stop any flashing on pins we'll use
-        all_clock_pins = []
-        for pos_data in DIGIT_POSITIONS.values():
-            all_clock_pins.extend(pos_data['offset_pins'])
+        all_clock_pins = get_all_clock_pins()
 
         for pin in all_clock_pins:
             if pin in GPIO_PINS and pin_states[pin].get('flashing', False):
