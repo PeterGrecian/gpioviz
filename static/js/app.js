@@ -7,6 +7,7 @@ let flashIntervals = {};
 let flashToolActive = false;
 let configToolActive = false;
 let peripheralToolActive = false;
+let clockToolActive = false;
 let currentLayout = 'hat';
 let originalHTML = null;
 const FLASH_SPEED = 500; // Fixed flash speed in ms
@@ -64,6 +65,9 @@ function initializeEventListeners() {
 
     // Peripheral tool button
     document.getElementById('peripheral-tool').addEventListener('click', togglePeripheralTool);
+
+    // Clock tool button
+    document.getElementById('clock-tool').addEventListener('click', toggleClock);
 
     // Test sequence button
     document.getElementById('test-sequence').addEventListener('click', toggleTestSequence);
@@ -274,6 +278,9 @@ function toggleConfigTool() {
     if (configToolActive && peripheralToolActive) {
         togglePeripheralTool();
     }
+    if (configToolActive && clockToolActive) {
+        toggleClock();
+    }
 
     if (configToolActive) {
         button.classList.add('active');
@@ -294,6 +301,9 @@ function toggleFlashTool() {
     }
     if (flashToolActive && peripheralToolActive) {
         togglePeripheralTool();
+    }
+    if (flashToolActive && clockToolActive) {
+        toggleClock();
     }
 
     if (flashToolActive) {
@@ -316,6 +326,9 @@ function togglePeripheralTool() {
     if (peripheralToolActive && configToolActive) {
         toggleConfigTool();
     }
+    if (peripheralToolActive && clockToolActive) {
+        toggleClock();
+    }
 
     if (peripheralToolActive) {
         button.classList.add('active');
@@ -327,6 +340,47 @@ function togglePeripheralTool() {
 
     // Update UI to show/hide next mode previews
     updateUI();
+}
+
+async function toggleClock() {
+    const button = document.getElementById('clock-tool');
+
+    // Deactivate other tools if active
+    if (!clockToolActive && flashToolActive) {
+        toggleFlashTool();
+    }
+    if (!clockToolActive && configToolActive) {
+        toggleConfigTool();
+    }
+    if (!clockToolActive && peripheralToolActive) {
+        togglePeripheralTool();
+    }
+
+    try {
+        const response = await fetch('/api/clock/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            clockToolActive = data.clock_running;
+
+            if (clockToolActive) {
+                button.classList.add('active');
+                button.textContent = '🕐 Stop Clock';
+            } else {
+                button.classList.remove('active');
+                button.textContent = '🕐 Clock';
+            }
+
+            await loadPinStates();
+        }
+    } catch (error) {
+        console.error('Error toggling clock:', error);
+    }
 }
 
 async function togglePinMode(pin) {

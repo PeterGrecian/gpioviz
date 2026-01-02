@@ -9,6 +9,14 @@ import yaml
 import os
 import argparse
 
+# Check if running as root
+def is_root():
+    """Check if the process is running as root"""
+    return os.geteuid() == 0
+
+# Determine if we need sudo prefix for commands
+SUDO_PREFIX = [] if is_root() else ['sudo']
+
 app = Flask(__name__)
 app.logger.disabled = True  # Disable Flask's request logging
 
@@ -20,6 +28,107 @@ GPIO.setwarnings(False)
 pin_states = {}
 flashing_pins = {}
 flash_threads = {}
+
+# Clock state
+clock_running = False
+clock_thread = None
+
+# Clock digit patterns - using a subset of pins to display digits 0-9
+# Each digit uses a pattern of pins to create a recognizable shape
+# Using simplified 7-segment style mapping
+DIGIT_PATTERNS = {
+    0: [11, 12, 19, 21, 23, 24, 26],  # Pattern for 0
+    1: [12, 19],                       # Pattern for 1
+    2: [11, 12, 8, 23, 24],           # Pattern for 2
+    3: [11, 12, 8, 21, 26],           # Pattern for 3
+    4: [19, 8, 12, 21],               # Pattern for 4
+    5: [11, 23, 8, 21, 26],           # Pattern for 5
+    6: [11, 23, 24, 26, 21, 8],       # Pattern for 6
+    7: [11, 12, 19],                  # Pattern for 7
+    8: [11, 12, 19, 21, 23, 24, 26, 8], # Pattern for 8
+    9: [11, 12, 19, 21, 8, 26]        # Pattern for 9
+}
+
+# Pin positions for each digit in HH:MM display
+# Digit 1 (Hour tens), Digit 2 (Hour ones), Digit 3 (Minute tens), Digit 4 (Minute ones)
+DIGIT_POSITIONS = {
+    0: {  # Hour tens - using leftmost pins
+        'offset_pins': [3, 5, 7, 11, 13, 15, 16, 8]
+    },
+    1: {  # Hour ones - using left-center pins
+        'offset_pins': [10, 12, 18, 22, 29, 31, 32, 36]
+    },
+    2: {  # Minute tens - using right-center pins
+        'offset_pins': [19, 21, 23, 24, 26, 35, 38, 40]
+    },
+    3: {  # Minute ones - using rightmost pins
+        'offset_pins': [33, 37, 15, 22, 32, 35, 38, 40]
+    }
+}
+
+def display_digit_on_pins(digit, position):
+    """Light up pins to display a digit at a specific position"""
+    pattern = DIGIT_PATTERNS.get(digit, [])
+    pin_map = DIGIT_POSITIONS.get(position, {}).get('offset_pins', [])
+
+    # Use first N pins from the position's pin map, where N is the pattern length
+    active_pins = []
+    for i, segment_active in enumerate(range(len(pattern))):
+        if i < len(pin_map) and segment_active < len(pattern):
+            # Map pattern index to actual pin
+            if segment_active < len(pin_map):
+                active_pins.append(pin_map[i])
+
+    return active_pins
+
+def clock_display_thread():
+    """Thread function to display clock on GPIO LEDs"""
+    global clock_running, pin_changes
+
+    while clock_running:
+        # Get current time
+        now = datetime.now()
+        hour = now.hour
+        minute = now.minute
+
+        # Extract digits
+        h_tens = hour // 10
+        h_ones = hour % 10
+        m_tens = minute // 10
+        m_ones = minute % 10
+
+        # Turn off all GPIO pins first
+        all_clock_pins = []
+        for pos_data in DIGIT_POSITIONS.values():
+            all_clock_pins.extend(pos_data['offset_pins'])
+
+        for pin in GPIO_PINS.keys():
+            if pin in all_clock_pins:
+                ensure_pin_setup(pin, 'OUT')
+                GPIO.output(pin, GPIO.LOW)
+                pin_states[pin]['state'] = 0
+
+        # Light up pins for each digit using a simple binary representation
+        # This is simpler and more reliable than complex patterns
+        digits = [h_tens, h_ones, m_tens, m_ones]
+
+        for digit_pos, digit_value in enumerate(digits):
+            pin_list = DIGIT_POSITIONS.get(digit_pos, {}).get('offset_pins', [])
+            # Use binary representation: each digit uses 4 LEDs to show binary value
+            for bit_pos in range(4):
+                if bit_pos < len(pin_list):
+                    pin = pin_list[bit_pos]
+                    if pin in GPIO_PINS:
+                        # Check if this bit is set in the digit value
+                        bit_value = (digit_value >> bit_pos) & 1
+                        ensure_pin_setup(pin, 'OUT')
+                        GPIO.output(pin, GPIO.HIGH if bit_value else GPIO.LOW)
+                        pin_states[pin]['state'] = bit_value
+                        if bit_value:
+                            pin_changes += 1
+
+        # Update every second
+        time.sleep(1)
 
 # Stats tracking
 start_time = datetime.now()
@@ -302,7 +411,7 @@ def toggle_peripheral(pin):
         new_mode = available_modes[0]
 
     # Attempt to enable/disable peripheral at runtime using dtparam
-    # Note: App should be run as sudo, so we don't need sudo in subprocess calls
+    # Use sudo if not running as root
     try:
         if new_mode == 'GPIO':
             # Disable all peripherals for this pin (return to GPIO mode)
@@ -311,20 +420,21 @@ def toggle_peripheral(pin):
             pass
         elif 'I2C' in new_mode:
             # Enable I2C at runtime
-            subprocess.run(['dtparam', 'i2c_arm=on'], check=True, capture_output=True)
-            subprocess.run(['modprobe', 'i2c-dev'], check=False, capture_output=True)
-            subprocess.run(['modprobe', 'i2c-bcm2835'], check=False, capture_output=True)
+            subprocess.run(SUDO_PREFIX + ['dtparam', 'i2c_arm=on'], check=True, capture_output=True)
+            subprocess.run(SUDO_PREFIX + ['modprobe', 'i2c-dev'], check=False, capture_output=True)
+            subprocess.run(SUDO_PREFIX + ['modprobe', 'i2c-bcm2835'], check=False, capture_output=True)
             print(f"Enabled I2C for pin {pin}")
         elif 'SPI' in new_mode:
             # Enable SPI at runtime
-            subprocess.run(['dtparam', 'spi=on'], check=True, capture_output=True)
+            subprocess.run(SUDO_PREFIX + ['dtparam', 'spi=on'], check=True, capture_output=True)
             print(f"Enabled SPI for pin {pin}")
         elif 'UART' in new_mode:
             # UART enabling is more complex, may require reboot
             pass
         # PWM and PCM can be controlled via software without dtparam
     except subprocess.CalledProcessError as e:
-        print(f"Warning: Could not enable {new_mode} for pin {pin}: {e.stderr.decode() if e.stderr else str(e)}")
+        stderr_msg = e.stderr.decode().strip() if e.stderr else str(e)
+        print(f"Warning: Could not enable {new_mode} for pin {pin}: {stderr_msg}")
         # Continue anyway - show the mode even if activation failed
     except Exception as e:
         print(f"Warning: Could not enable {new_mode} for pin {pin}: {e}")
@@ -399,6 +509,59 @@ def api_list_configs():
     configs = [f for f in os.listdir(config_dir) if f.endswith('.yaml') or f.endswith('.yml')]
     return jsonify({'configs': configs})
 
+@app.route('/api/clock/toggle', methods=['POST'])
+def toggle_clock():
+    """Toggle clock display on/off"""
+    global clock_running, clock_thread, pin_changes
+
+    if clock_running:
+        # Stop the clock
+        clock_running = False
+        if clock_thread:
+            clock_thread.join()
+            clock_thread = None
+
+        # Turn off all clock pins
+        all_clock_pins = []
+        for pos_data in DIGIT_POSITIONS.values():
+            all_clock_pins.extend(pos_data['offset_pins'])
+
+        for pin in GPIO_PINS.keys():
+            if pin in all_clock_pins:
+                # Stop any flashing first
+                if pin_states[pin].get('flashing', False):
+                    flashing_pins[pin] = False
+                    if pin in flash_threads:
+                        flash_threads[pin].join()
+                    pin_states[pin]['flashing'] = False
+
+                ensure_pin_setup(pin, 'OUT')
+                GPIO.output(pin, GPIO.LOW)
+                pin_states[pin]['state'] = 0
+
+        return jsonify({'success': True, 'clock_running': False})
+    else:
+        # Start the clock
+        # First stop any flashing on pins we'll use
+        all_clock_pins = []
+        for pos_data in DIGIT_POSITIONS.values():
+            all_clock_pins.extend(pos_data['offset_pins'])
+
+        for pin in all_clock_pins:
+            if pin in GPIO_PINS and pin_states[pin].get('flashing', False):
+                flashing_pins[pin] = False
+                if pin in flash_threads:
+                    flash_threads[pin].join()
+                pin_states[pin]['flashing'] = False
+
+        clock_running = True
+        clock_thread = threading.Thread(target=clock_display_thread)
+        clock_thread.daemon = True
+        clock_thread.start()
+        pin_changes += 1
+
+        return jsonify({'success': True, 'clock_running': True})
+
 def save_configuration(filename='config.yaml'):
     """Save current pin configuration to YAML file"""
     config = {
@@ -462,8 +625,18 @@ def load_configuration(filename='config.yaml'):
 
 def cleanup():
     """Cleanup GPIO on exit"""
+    global clock_running
+
+    # Stop clock if running
+    if clock_running:
+        clock_running = False
+        if clock_thread:
+            clock_thread.join()
+
+    # Stop all flashing
     for pin in flashing_pins.keys():
         flashing_pins[pin] = False
+
     GPIO.cleanup()
 
 if __name__ == '__main__':
