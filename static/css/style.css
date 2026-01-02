@@ -154,22 +154,33 @@ header h1 {
     transform: scale(1.05);
 }
 
+/* Flash tool cursor - whole cell clickable */
 body.flash-tool-active {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚡</text></svg>') 12 12, auto;
+}
+
+body.flash-tool-active .pin.gpio {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚡</text></svg>') 12 12, pointer;
 }
 
 body.flash-tool-active .pin-indicator {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚡</text></svg>') 12 12, pointer;
 }
 
+/* Config tool cursor - whole cell clickable */
 body.config-tool-active {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚙</text></svg>') 12 12, auto;
+}
+
+body.config-tool-active .pin.gpio {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚙</text></svg>') 12 12, pointer;
 }
 
 body.config-tool-active .pin-indicator {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚙</text></svg>') 12 12, pointer;
 }
 
+/* Peripheral tool cursor - whole cell clickable */
 body.peripheral-tool-active {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">☠</text></svg>') 12 12, auto;
 }

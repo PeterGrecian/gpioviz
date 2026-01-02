@@ -85,30 +85,25 @@ function initializeEventListeners() {
         const pinElements = document.querySelectorAll(`.pin[data-pin="${pin}"]`);
 
         pinElements.forEach(pinElement => {
-            // For peripheral mode, make the whole cell clickable
-            const clickTarget = pinElement;
             const indicator = pinElement.querySelector('.pin-indicator');
 
-            // Click handler for the whole pin cell
-            clickTarget.addEventListener('click', (e) => {
+            // Click handler for the whole pin cell (for mode tools)
+            pinElement.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (peripheralToolActive) {
                     togglePeripheralMode(pin);
+                } else if (flashToolActive) {
+                    activateFlashOnPin(pin);
+                } else if (configToolActive) {
+                    togglePinMode(pin);
                 }
             });
 
-            // Click handler for the indicator (when not in peripheral mode)
+            // Click handler for the indicator (when no mode tool active)
             if (indicator) {
                 indicator.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (peripheralToolActive) {
-                        // Already handled by cell click
-                        return;
-                    } else if (flashToolActive) {
-                        activateFlashOnPin(pin);
-                    } else if (configToolActive) {
-                        togglePinMode(pin);
-                    } else {
+                    if (!peripheralToolActive && !flashToolActive && !configToolActive) {
                         togglePinState(pin);
                     }
                 });
