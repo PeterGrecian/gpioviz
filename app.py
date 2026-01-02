@@ -49,33 +49,43 @@ clock_thread = None
 # Row 3: [40, 33, 37]  GPIO: [21, 13, 26]
 
 # Digit patterns for ONES digit (right 3 columns) - using GPIO numbers
-# Each digit is defined by which GPIO pins to light up
+# Grid layout:  Left(L) Mid(M) Right(R)
+#   Row 0 (T):   11     8      7
+#   Row 1 (U):    5     6     16
+#   Row 2 (L):   12    20     19
+#   Row 3 (B):   21    13     26
+
 ONES_PATTERNS_GPIO = {
-    0: [11, 7, 5, 16, 12, 19, 21, 26],           # 0: outer ring
-    1: [8, 6, 20, 13],                            # 1: middle column (as specified)
-    2: [11, 8, 7, 6, 12, 21, 13, 26],            # 2: top, right-upper, middle-left, bottom (as specified)
-    3: [11, 8, 7, 6, 16, 13, 26],                # 3: top, right side, middle, bottom
-    4: [11, 5, 12, 20, 8, 6, 16],                # 4: left-upper, middle, right side
-    5: [11, 8, 7, 5, 12, 20, 13, 26],            # 5: top, left-upper, middle, right-lower, bottom
-    6: [11, 7, 5, 12, 20, 19, 21, 13, 26],       # 6: top-right, left side, middle, bottom, right-lower
-    7: [11, 8, 7, 16, 19, 26],                   # 7: top, right side
-    8: [11, 8, 7, 5, 6, 16, 12, 20, 19, 21, 13, 26],  # 8: all segments
-    9: [11, 8, 7, 5, 6, 16, 12, 20, 13, 26]      # 9: top, left-upper, middle, right side, bottom
+    0: [11, 8, 7,  5, 16,  12, 19,  21, 13, 26],        # All except middle row
+    1: [8, 6, 20, 13],                                   # Middle column
+    2: [11, 8, 7,  16,  20,  12, 21,  13, 26],          # Top, UR, middle, LL, bottom
+    3: [11, 8, 7,  6, 16,  20,  19, 26,  13],           # Top, right, middle, bottom-mid
+    4: [11,  5,  12, 20, 19,  6, 16, 26],               # TL, left-upper, middle, right
+    5: [11, 8, 7,  5,  20,  19, 26,  13],               # Top, left-upper, middle-center, BR, bottom-mid
+    6: [11, 8, 7,  5,  12, 20, 19,  21, 13, 26],        # Top, left-upper, middle, bottom (6 shape)
+    7: [11, 8, 7,  16,  19, 26],                        # Top, right side
+    8: [11, 8, 7,  5, 6, 16,  12, 20, 19,  21, 13, 26], # All 12 segments
+    9: [11, 8, 7,  5, 6, 16,  20,  19, 26, 13]          # Top, upper-sides, middle-center, BR, bottom-mid
 }
 
 # Digit patterns for TENS digit (left 3 columns) - using GPIO numbers
-# Same patterns but mapped to left column GPIOs
+# Grid layout:  Left(L) Mid(M) Right(R)
+#   Row 0 (T):   17    18     10
+#   Row 1 (U):   14    15     24
+#   Row 2 (L):   23    22     --  (skip reserved pin 27)
+#   Row 3 (B):    2     3      4
+
 TENS_PATTERNS_GPIO = {
-    0: [17, 10, 14, 24, 23, 22, 2, 4],           # 0: outer ring
-    1: [18, 15, 22, 3],                           # 1: middle column
-    2: [17, 18, 10, 15, 23, 2, 3, 4],            # 2: top, right-upper, middle-left, bottom
-    3: [17, 18, 10, 15, 24, 3, 4],               # 3: top, right side, middle, bottom
-    4: [17, 14, 23, 22, 18, 15, 24],             # 4: left-upper, middle, right side
-    5: [17, 18, 10, 14, 23, 22, 3, 4],           # 5: top, left-upper, middle, right-lower, bottom
-    6: [17, 10, 14, 23, 22, 24, 2, 3, 4],        # 6: top-right, left side, middle, bottom, right-lower
-    7: [17, 18, 10, 24, 22, 4],                  # 7: top, right side
-    8: [17, 18, 10, 14, 15, 24, 23, 22, 2, 3, 4],     # 8: all segments (skip reserved pin 27)
-    9: [17, 18, 10, 14, 15, 24, 23, 22, 3, 4]    # 9: top, left-upper, middle, right side, bottom
+    0: [17, 18, 10,  14, 24,  23, 2,  3, 4],            # All except middle row
+    1: [18, 15, 22, 3],                                  # Middle column
+    2: [17, 18, 10,  24,  22,  23, 2,  3, 4],           # Top, UR, middle, LL, bottom
+    3: [17, 18, 10,  15, 24,  22,  4,  3],              # Top, right, middle, bottom-mid
+    4: [17,  14,  23, 22,  15, 24, 4],                  # TL, left-upper, middle, right
+    5: [17, 18, 10,  14,  22,  4,  3],                  # Top, left-upper, middle-center, BR, bottom-mid
+    6: [17, 18, 10,  14,  23, 22,  2, 3, 4],            # Top, left-upper, middle, bottom (6 shape)
+    7: [17, 18, 10,  24,  4],                           # Top, right side
+    8: [17, 18, 10,  14, 15, 24,  23, 22,  2, 3, 4],    # All segments (skip reserved pin 27)
+    9: [17, 18, 10,  14, 15, 24,  22,  4, 3]            # Top, upper-sides, middle-center, BR, bottom-mid
 }
 
 # Mapping from GPIO number to pin number for the right 3 columns (ones)
