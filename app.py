@@ -33,45 +33,54 @@ flash_threads = {}
 clock_running = False
 clock_thread = None
 
-# HAT mode clock display using 12 positions on each side
-# Right 3 columns (5,6,7) = 12 LEDs for seconds (each LED = 5 second interval)
-# Columns 1-3 = 12 LEDs for tens of seconds (each LED = 10 second interval)
+# HAT mode clock display using right 3 columns (C5, C6, C7)
+# Creates digit patterns in a 4x3 grid to display seconds
 
-# HAT layout columns (from JS):
-# Row 0: [17, 11, 12, 19, 21, 23, 24, 26]
-# Row 1: [1,  8,  10, 18, 22, 29, 31, 36]
-# Row 2: [2,  16, 15, 27, 28, 32, 38, 35]
-# Row 3: [4,  3,  5,  7,  13, 40, 33, 37]
-#        C0  C1  C2  C3  C4  C5  C6  C7
+# HAT layout right 3 columns:
+# Row 0: [23, 24, 26]  GPIO: [11,  8,  7]
+# Row 1: [29, 31, 36]  GPIO: [ 5,  6, 16]
+# Row 2: [32, 38, 35]  GPIO: [12, 20, 19]
+# Row 3: [40, 33, 37]  GPIO: [21, 13, 26]
 
-# Right 3 columns (C5, C6, C7) - for seconds display (12 positions)
-SECONDS_PINS = [
-    23, 24, 26,  # Row 0, columns 5-7
-    29, 31, 36,  # Row 1, columns 5-7
-    32, 38, 35,  # Row 2, columns 5-7
-    40, 33, 37   # Row 3, columns 5-7
-]
+# Digit patterns using GPIO numbers (not pin numbers)
+# Each digit is defined by which GPIO pins to light up
+DIGIT_PATTERNS_GPIO = {
+    0: [11, 7, 5, 16, 12, 19, 21, 26],           # 0: outer ring
+    1: [8, 6, 20, 13],                            # 1: middle column (as specified)
+    2: [11, 8, 7, 6, 12, 21, 13, 26],            # 2: top, right-upper, middle-left, bottom (as specified)
+    3: [11, 8, 7, 6, 16, 13, 26],                # 3: top, right side, middle, bottom
+    4: [11, 5, 12, 20, 8, 6, 16],                # 4: left-upper, middle, right side
+    5: [11, 8, 7, 5, 12, 20, 13, 26],            # 5: top, left-upper, middle, right-lower, bottom
+    6: [11, 7, 5, 12, 20, 19, 21, 13, 26],       # 6: top-right, left side, middle, bottom, right-lower
+    7: [11, 8, 7, 16, 19, 26],                   # 7: top, right side
+    8: [11, 8, 7, 5, 6, 16, 12, 20, 19, 21, 13, 26],  # 8: all segments
+    9: [11, 8, 7, 5, 6, 16, 12, 20, 13, 26]      # 9: top, left-upper, middle, right side, bottom
+}
 
-# Columns 1-3 (C1, C2, C3) - for tens of seconds display (12 positions, use first 6)
-TENS_PINS = [
-    11, 12, 19,  # Row 0, columns 1-3
-    8,  10, 18,  # Row 1, columns 1-3
-    16, 15, 27,  # Row 2, columns 1-3 (27 is reserved but we'll include it)
-    3,  5,  7    # Row 3, columns 1-3
-]
+# Mapping from GPIO number to pin number for the right 3 columns
+GPIO_TO_PIN = {
+    11: 23, 8: 24, 7: 26,    # Row 0
+    5: 29, 6: 31, 16: 36,    # Row 1
+    12: 32, 20: 38, 19: 35,  # Row 2
+    21: 40, 13: 33, 26: 37   # Row 3
+}
 
 def get_all_clock_pins():
     """Get all pins used by the clock display"""
-    return SECONDS_PINS + TENS_PINS
+    return list(GPIO_TO_PIN.values())
 
 def clock_display_thread():
-    """Thread function to display seconds on GPIO LEDs using 12-position clock face"""
+    """Thread function to display seconds as digits on GPIO LEDs"""
     global clock_running, pin_changes
 
     while clock_running:
         # Get current seconds (0-59)
         now = datetime.now()
         seconds = now.second
+
+        # Extract tens and ones digits
+        tens_digit = seconds // 10
+        ones_digit = seconds % 10
 
         # Turn off all clock pins first
         all_clock_pins = get_all_clock_pins()
@@ -81,26 +90,13 @@ def clock_display_thread():
                 GPIO.output(pin, GPIO.LOW)
                 pin_states[pin]['state'] = 0
 
-        # Calculate which position to light up for seconds (0-11, each represents 5 seconds)
-        # 0-4 sec = position 0, 5-9 sec = position 1, etc.
-        seconds_position = seconds // 5
+        # Get the pattern for the ones digit (always display the ones)
+        gpio_pattern = DIGIT_PATTERNS_GPIO.get(ones_digit, [])
 
-        # Calculate which position to light up for tens (0-5, each represents 10 seconds)
-        # 0-9 sec = position 0, 10-19 sec = position 1, etc.
-        tens_position = seconds // 10
-
-        # Light up the appropriate LED for seconds (right side)
-        if 0 <= seconds_position < len(SECONDS_PINS):
-            pin = SECONDS_PINS[seconds_position]
-            if pin in GPIO_PINS:
-                ensure_pin_setup(pin, 'OUT')
-                GPIO.output(pin, GPIO.HIGH)
-                pin_states[pin]['state'] = 1
-
-        # Light up the appropriate LED for tens (left side)
-        if 0 <= tens_position < len(TENS_PINS):
-            pin = TENS_PINS[tens_position]
-            if pin in GPIO_PINS:
+        # Light up the LEDs for the digit pattern
+        for gpio_num in gpio_pattern:
+            pin = GPIO_TO_PIN.get(gpio_num)
+            if pin and pin in GPIO_PINS:
                 ensure_pin_setup(pin, 'OUT')
                 GPIO.output(pin, GPIO.HIGH)
                 pin_states[pin]['state'] = 1
