@@ -255,7 +255,8 @@ for pin in GPIO_PINS.keys():
         'flashing': False,
         'flash_speed': 500,
         'peripheral_mode': 'GPIO',  # Current peripheral function
-        'available_modes': alt_funcs
+        'available_modes': alt_funcs,
+        'component': False  # Track if pin has a component assigned
     }
 
 def ensure_pin_setup(pin, mode='OUT'):
@@ -511,6 +512,10 @@ def toggle_peripheral(pin):
 def reset_all():
     """Reset all pins to LOW output"""
     for pin in GPIO_PINS.keys():
+        # Skip pins with components assigned
+        if pin_states[pin].get('component', False):
+            continue
+
         # Stop flashing
         if pin_states[pin]['flashing']:
             flashing_pins[pin] = False
@@ -519,7 +524,10 @@ def reset_all():
 
         ensure_pin_setup(pin, 'OUT')
         GPIO.output(pin, GPIO.LOW)
-        pin_states[pin] = {'mode': 'OUT', 'state': 0, 'flashing': False, 'flash_speed': 500}
+        # Preserve important fields when resetting
+        pin_states[pin]['mode'] = 'OUT'
+        pin_states[pin]['state'] = 0
+        pin_states[pin]['flashing'] = False
 
     return jsonify({'success': True})
 
@@ -643,6 +651,13 @@ def assign_component():
         if pin in flash_threads:
             flash_threads[pin].join()
         pin_states[pin]['flashing'] = False
+
+    # Clean up GPIO to release pin from any previous configuration
+    # This is critical for sensors like DHT22 that use their own libraries
+    try:
+        GPIO.cleanup(pin)
+    except:
+        pass  # Ignore if pin wasn't set up
 
     # Create and assign component
     component = component_registry.create_component(component_type, name, gpio_pins, config)
