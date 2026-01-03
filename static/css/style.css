@@ -156,8 +156,9 @@ header h1 {
 
 .main-content {
     display: flex;
+    flex-direction: column;
     gap: 15px;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
 }
 
