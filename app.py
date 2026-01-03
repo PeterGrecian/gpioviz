@@ -665,12 +665,16 @@ def assign_component():
             flash_threads[pin].join()
         pin_states[pin]['flashing'] = False
 
-    # Clean up GPIO to release pin from any previous configuration
-    # This is critical for sensors like DHT22 that use their own libraries
-    try:
-        GPIO.cleanup(pin)
-    except:
-        pass  # Ignore if pin wasn't set up
+    # Clean up GPIO only if NOT a DHT22 component
+    # DHT22 uses Adafruit_DHT which does its own low-level GPIO access
+    # and doesn't need (or want) RPi.GPIO to touch the pin
+    if component_type != 'dht22':
+        try:
+            GPIO.cleanup(pin)
+            # Re-establish GPIO mode after cleanup
+            GPIO.setmode(GPIO.BOARD)
+        except:
+            pass  # Ignore if pin wasn't set up
 
     # Convert BOARD pin numbers to BCM for components that require BCM numbering
     # (e.g., Adafruit_DHT library only uses BCM)
