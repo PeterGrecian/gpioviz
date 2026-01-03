@@ -1,0 +1,14 @@
+[Unit]
+Description=GPIO Visualizer Web Application
+After=network.target
+
+[Service]
+Type=simple
+User=peter
+WorkingDirectory=/home/peter/gpioviz
+ExecStart=/usr/bin/python3 /home/peter/gpioviz/app.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
