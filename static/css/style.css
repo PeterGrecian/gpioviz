@@ -713,13 +713,17 @@ body.peripheral-tool-active .pin-indicator {
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     min-width: 200px;
-    margin-top: 4px;
+    margin-top: 2px;
     z-index: 1000;
     overflow: hidden;
 }
 
-.menu-item:hover .menu-dropdown {
+.menu-item.open .menu-dropdown {
     display: block;
+}
+
+.menu-button.active {
+    background-color: #e0e0e0;
 }
 
 .menu-dropdown a {
