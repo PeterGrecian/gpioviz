@@ -390,6 +390,17 @@ function updateUI() {
                     }
                 }
 
+                // Check for component assignments
+                if (indicator) {
+                    // Remove all component classes first
+                    indicator.classList.remove('has-dht22');
+
+                    // Add component-specific class based on mode
+                    if (state.mode === 'DHT22' || state.component) {
+                        indicator.classList.add('has-dht22');
+                    }
+                }
+
                 // Update indicator shape based on mode
                 if (state.mode === 'IN') {
                     indicator.classList.add('input-mode');

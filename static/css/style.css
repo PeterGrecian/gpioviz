@@ -738,7 +738,7 @@ header h1 {
     font-weight: 700;
 }
 
-/* Tool Cursors - apply to entire GPIO board */
+/* Tool Cursors - apply to entire GPIO board with custom icons */
 body.toggle-tool-active .gpio-board,
 body.toggle-tool-active .gpio-board * {
     cursor: pointer !important;
@@ -751,15 +751,27 @@ body.config-tool-active .gpio-board * {
 
 body.flash-tool-active .gpio-board,
 body.flash-tool-active .gpio-board * {
-    cursor: crosshair !important;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><text x="8" y="24" font-size="24">⚡</text></svg>') 16 16, crosshair !important;
 }
 
 body.peripheral-tool-active .gpio-board,
 body.peripheral-tool-active .gpio-board * {
-    cursor: help !important;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><text x="4" y="24" font-size="24">🔧</text></svg>') 16 16, help !important;
 }
 
 body.dht22-tool-active .gpio-board,
 body.dht22-tool-active .gpio-board * {
-    cursor: copy !important;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><text x="4" y="24" font-size="24">🌡</text></svg>') 16 16, copy !important;
+}
+
+/* Component indicators on pins */
+.pin-indicator.has-dht22::after {
+    content: '🌡';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    pointer-events: none;
+    z-index: 10;
 }
