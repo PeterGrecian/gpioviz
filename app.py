@@ -823,6 +823,47 @@ def cleanup():
 
     GPIO.cleanup()
 
+def detect_hat():
+    """
+    Detect if a HAT is connected by checking for HAT EEPROM
+    Returns tuple: (detected: bool, hat_info: str)
+    """
+    try:
+        # Check for HAT device tree overlay
+        import os
+        hat_paths = [
+            '/proc/device-tree/hat/product',
+            '/proc/device-tree/hat/vendor',
+            '/sys/firmware/devicetree/base/hat/product',
+            '/sys/firmware/devicetree/base/hat/vendor'
+        ]
+
+        hat_info = {}
+        for path in hat_paths:
+            if os.path.exists(path):
+                try:
+                    with open(path, 'r') as f:
+                        content = f.read().strip('\x00').strip()
+                        key = path.split('/')[-1]
+                        if content:
+                            hat_info[key] = content
+                except:
+                    pass
+
+        if hat_info:
+            info_str = ', '.join([f"{k}: {v}" for k, v in hat_info.items()])
+            return True, info_str
+
+        # Fallback: check if ID EEPROM is accessible
+        # Note: This requires dtparam=i2c_vc=on in /boot/config.txt
+        eeprom_path = '/sys/class/i2c-adapter/i2c-0/0-0050/eeprom'
+        if os.path.exists(eeprom_path):
+            return True, "ID EEPROM detected at 0x50"
+
+        return False, "No HAT detected"
+    except Exception as e:
+        return False, f"Detection error: {str(e)}"
+
 if __name__ == '__main__':
     import logging
 
@@ -842,6 +883,9 @@ if __name__ == '__main__':
         load_configuration(args.load_config)
 
     try:
+        # Detect HAT
+        hat_detected, hat_info = detect_hat()
+
         # Get git commit hash
         try:
             commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
@@ -851,6 +895,10 @@ if __name__ == '__main__':
         print("\n" + "="*70)
         print("  Raspberry Pi GPIO Visualizer")
         print(f"  http://0.0.0.0:{args.port}")
+        if hat_detected:
+            print(f"  HAT: ✓ {hat_info}")
+        else:
+            print(f"  HAT: ✗ {hat_info}")
         print(f"  Git commit: {commit_hash}")
         if args.load_config:
             print(f"  Loaded config: {args.load_config}")
