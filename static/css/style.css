@@ -815,16 +815,20 @@ body.dht22-tool-active .gpio-board * {
 .pin-indicator.has-dht22 {
     background: #34495e !important;
     border-color: #e67e22 !important;
+    border-width: 3px !important;
 }
 
-/* Smaller icon for HAT mode */
-.pin-row.layout-hat .pin-indicator.has-dht22::after {
-    font-size: 14px;
+/* Make icon larger and more visible in HAT mode */
+.pin-row-hat .pin-indicator.has-dht22::after,
+.layout-hat .pin-indicator.has-dht22::after {
+    font-size: 18px !important;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 1)) !important;
 }
 
-/* Even smaller on mobile */
+/* Larger on mobile HAT mode too */
 @media (max-width: 768px) {
-    .pin-row.layout-hat .pin-indicator.has-dht22::after {
-        font-size: 12px;
+    .pin-row-hat .pin-indicator.has-dht22::after,
+    .layout-hat .pin-indicator.has-dht22::after {
+        font-size: 16px !important;
     }
 }
