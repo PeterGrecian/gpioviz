@@ -168,14 +168,22 @@ def component_read_thread(pin):
     """Thread function to periodically read component data"""
     global component_running, component_data
 
+    print(f"[THREAD] Component thread started for pin {pin}")
+
     # Initial delay to let sensor stabilize after GPIO setup
     # Critical for sensors like DHT22 that need time after pin state changes
+    print(f"[THREAD] Waiting 2 seconds for sensor stabilization...")
     time.sleep(2)
 
+    print(f"[THREAD] Starting read loop for pin {pin}")
+    read_count = 0
     while component_running.get(pin, False):
         component = component_registry.get_component(pin)
         if component:
             try:
+                read_count += 1
+                print(f"[THREAD] Read #{read_count} for pin {pin}")
+
                 # Read data from component
                 data = component.read()
 
@@ -185,11 +193,17 @@ def component_read_thread(pin):
                     'last_updated': datetime.now().strftime('%H:%M:%S'),
                     'component_type': component.__class__.__name__
                 }
+
+                print(f"[THREAD] Stored data: {data}")
             except Exception as e:
-                print(f"Error reading component on pin {pin}: {e}")
+                print(f"[THREAD] ERROR reading component on pin {pin}: {e}")
+                import traceback
+                traceback.print_exc()
 
         # Update interval (could be configurable per component)
         time.sleep(2)
+
+    print(f"[THREAD] Component thread stopped for pin {pin}")
 
 # Stats tracking
 start_time = datetime.now()
