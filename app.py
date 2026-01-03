@@ -345,8 +345,9 @@ def get_pins():
         update_status_line()
 
     # Read actual state of all INPUT pins
+    # Skip pins with components (they manage their own state)
     for pin in GPIO_PINS.keys():
-        if pin_states[pin]['mode'] == 'IN':
+        if pin_states[pin]['mode'] == 'IN' and not pin_states[pin].get('component', False):
             pin_states[pin]['state'] = GPIO.input(pin)
 
     return jsonify({
