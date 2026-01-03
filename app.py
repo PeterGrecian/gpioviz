@@ -827,9 +827,16 @@ if __name__ == '__main__':
         load_configuration(args.load_config)
 
     try:
+        # Get git commit hash
+        try:
+            commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+        except Exception:
+            commit_hash = 'unknown'
+
         print("\n" + "="*70)
         print("  Raspberry Pi GPIO Visualizer")
         print(f"  http://0.0.0.0:{args.port}")
+        print(f"  Git commit: {commit_hash}")
         if args.load_config:
             print(f"  Loaded config: {args.load_config}")
         print("="*70 + "\n")
