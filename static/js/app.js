@@ -427,23 +427,32 @@ function toggleDHT22Tool() {
     }
 }
 
+let dht22Pin = null; // Track which pin has the DHT22 component
+
 async function configureDHT22OnPin(pin) {
     try {
-        const response = await fetch('/api/dht22/configure', {
+        const response = await fetch('/api/component/assign', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ pin: pin })
+            body: JSON.stringify({
+                pin: pin,
+                component_type: 'dht22',
+                name: `DHT22_${pin}`,
+                gpio_pins: { data: pin },
+                config: { polling: 2, retries: 3 }
+            })
         });
 
         const data = await response.json();
         if (data.success) {
+            dht22Pin = pin;
             await loadPinStates();
             // Deactivate tool after configuring
             toggleDHT22Tool();
             // Start polling for DHT22 data
-            startDHT22Polling();
+            startDHT22Polling(pin);
         } else {
             alert(`Error: ${data.error}`);
         }
@@ -455,7 +464,7 @@ async function configureDHT22OnPin(pin) {
 
 let dht22PollInterval = null;
 
-function startDHT22Polling() {
+function startDHT22Polling(pin) {
     // Show the DHT22 panel
     document.getElementById('dht22-readings').style.display = 'block';
 
@@ -465,26 +474,27 @@ function startDHT22Polling() {
     }
 
     // Poll every 2 seconds
-    dht22PollInterval = setInterval(updateDHT22Display, 2000);
+    dht22PollInterval = setInterval(() => updateDHT22Display(pin), 2000);
     // Update immediately
-    updateDHT22Display();
+    updateDHT22Display(pin);
 }
 
-async function updateDHT22Display() {
+async function updateDHT22Display(pin) {
     try {
-        const response = await fetch('/api/dht22/data');
+        const response = await fetch(`/api/component/${pin}/data`);
         const data = await response.json();
 
         if (data.success && data.running) {
-            document.getElementById('dht22-pin').textContent = data.pin || '--';
+            const componentData = data.data.data || {};
+            document.getElementById('dht22-pin').textContent = pin || '--';
             document.getElementById('dht22-temp').textContent =
-                data.data.temperature !== null ? data.data.temperature : '--';
+                componentData.temperature !== undefined ? componentData.temperature : '--';
             document.getElementById('dht22-humidity').textContent =
-                data.data.humidity !== null ? data.data.humidity : '--';
+                componentData.humidity !== undefined ? componentData.humidity : '--';
             document.getElementById('dht22-updated').textContent =
                 data.data.last_updated || '--';
         } else {
-            // Stop polling if DHT22 is not running
+            // Stop polling if component is not running
             if (dht22PollInterval) {
                 clearInterval(dht22PollInterval);
                 dht22PollInterval = null;
@@ -492,7 +502,7 @@ async function updateDHT22Display() {
             document.getElementById('dht22-readings').style.display = 'none';
         }
     } catch (error) {
-        console.error('Error fetching DHT22 data:', error);
+        console.error('Error fetching component data:', error);
     }
 }
 

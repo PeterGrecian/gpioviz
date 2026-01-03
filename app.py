@@ -9,13 +9,9 @@ import yaml
 import os
 import argparse
 
-# Try to import Adafruit_DHT for DHT22 sensor support
-try:
-    import Adafruit_DHT
-    DHT22_AVAILABLE = True
-except ImportError:
-    DHT22_AVAILABLE = False
-    print("Warning: Adafruit_DHT not available. DHT22 sensor support disabled.")
+# Import component system
+from components import ComponentRegistry
+from components.producers import DHT22Component
 
 # Check if running as root
 def is_root():
@@ -41,15 +37,15 @@ flash_threads = {}
 clock_running = False
 clock_thread = None
 
-# DHT22 sensor state
-dht22_pin = None
-dht22_running = False
-dht22_thread = None
-dht22_data = {
-    'temperature': None,
-    'humidity': None,
-    'last_updated': None
-}
+# Component system
+component_registry = ComponentRegistry(definitions_file='components/definitions.json')
+# Register available component classes
+component_registry.register_class('dht22', DHT22Component)
+
+# Component reading state
+component_threads = {}  # pin -> thread
+component_running = {}  # pin -> bool
+component_data = {}     # pin -> latest data
 
 # HAT mode clock display using left 3 columns for tens, right 3 columns for ones
 # Creates digit patterns in 4x3 grids to display seconds
@@ -168,35 +164,27 @@ def clock_display_thread():
         # Update every second
         time.sleep(1)
 
-def dht22_read_thread():
-    """Thread function to periodically read DHT22 sensor data"""
-    global dht22_running, dht22_data, dht22_pin
+def component_read_thread(pin):
+    """Thread function to periodically read component data"""
+    global component_running, component_data
 
-    while dht22_running:
-        if dht22_pin and DHT22_AVAILABLE:
+    while component_running.get(pin, False):
+        component = component_registry.get_component(pin)
+        if component:
             try:
-                # Read from DHT22 sensor (using GPIO BCM numbering)
-                # Convert board pin to BCM GPIO number
-                gpio_bcm = None
-                for board_pin, gpio_name in GPIO_PINS.items():
-                    if board_pin == dht22_pin:
-                        # Extract BCM GPIO number from name like "GPIO17"
-                        gpio_bcm = int(gpio_name.split('(')[0].replace('GPIO', '').strip())
-                        break
+                # Read data from component
+                data = component.read()
 
-                if gpio_bcm is not None:
-                    humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, gpio_bcm)
-
-                    if humidity is not None and temperature is not None:
-                        dht22_data['temperature'] = round(temperature, 1)
-                        dht22_data['humidity'] = round(humidity, 1)
-                        dht22_data['last_updated'] = datetime.now().strftime('%H:%M:%S')
-                    else:
-                        print(f"Failed to read DHT22 on pin {dht22_pin} (GPIO{gpio_bcm})")
+                # Store data with timestamp
+                component_data[pin] = {
+                    'data': data,
+                    'last_updated': datetime.now().strftime('%H:%M:%S'),
+                    'component_type': component.__class__.__name__
+                }
             except Exception as e:
-                print(f"Error reading DHT22: {e}")
+                print(f"Error reading component on pin {pin}: {e}")
 
-        # Update every 2 seconds (DHT22 has ~2 second response time)
+        # Update interval (could be configurable per component)
         time.sleep(2)
 
 # Stats tracking
@@ -627,26 +615,27 @@ def toggle_clock():
 
         return jsonify({'success': True, 'clock_running': True})
 
-@app.route('/api/dht22/configure', methods=['POST'])
-def configure_dht22():
-    """Configure a pin as DHT22 sensor"""
-    global dht22_pin, dht22_running, dht22_thread, dht22_data, pin_changes
-
-    if not DHT22_AVAILABLE:
-        return jsonify({'success': False, 'error': 'Adafruit_DHT library not available'}), 500
+@app.route('/api/component/assign', methods=['POST'])
+def assign_component():
+    """Assign a component to a pin"""
+    global pin_changes
 
     data = request.json
     pin = data.get('pin')
+    component_type = data.get('component_type')
+    name = data.get('name', f'{component_type}_{pin}')
+    gpio_pins = data.get('gpio_pins', {'data': pin})
+    config = data.get('config', {})
 
     if pin not in GPIO_PINS:
         return jsonify({'error': 'Invalid pin'}), 400
 
-    # Stop any existing DHT22 reading
-    if dht22_running:
-        dht22_running = False
-        if dht22_thread:
-            dht22_thread.join()
-            dht22_thread = None
+    # Stop any existing component on this pin
+    if pin in component_running:
+        component_running[pin] = False
+        if pin in component_threads:
+            component_threads[pin].join()
+            del component_threads[pin]
 
     # Stop any flashing on this pin
     if pin_states[pin].get('flashing', False):
@@ -655,52 +644,83 @@ def configure_dht22():
             flash_threads[pin].join()
         pin_states[pin]['flashing'] = False
 
-    # Configure pin for DHT22 (input mode)
-    dht22_pin = pin
-    pin_states[pin]['mode'] = 'DHT22'
-    pin_states[pin]['dht22'] = True
+    # Create and assign component
+    component = component_registry.create_component(component_type, name, gpio_pins, config)
+
+    if not component:
+        return jsonify({'success': False, 'error': f'Failed to create {component_type} component'}), 500
+
+    component_registry.assign_component(pin, component)
+
+    # Update pin state
+    pin_states[pin]['mode'] = component_type.upper()
+    pin_states[pin]['component'] = True
     pin_changes += 1
 
-    # Start reading thread
-    dht22_running = True
-    dht22_thread = threading.Thread(target=dht22_read_thread)
-    dht22_thread.daemon = True
-    dht22_thread.start()
+    # Start reading thread for producer components
+    if hasattr(component, 'read'):
+        component_running[pin] = True
+        thread = threading.Thread(target=component_read_thread, args=(pin,))
+        thread.daemon = True
+        component_threads[pin] = thread
+        thread.start()
 
     return jsonify({
         'success': True,
         'pin': pin,
-        'mode': 'DHT22'
+        'component_type': component_type,
+        'name': name
     })
 
-@app.route('/api/dht22/data', methods=['GET'])
-def get_dht22_data():
-    """Get current DHT22 sensor readings"""
+@app.route('/api/component/<int:pin>/data', methods=['GET'])
+def get_component_data(pin):
+    """Get current component data for a pin"""
+    if pin not in GPIO_PINS:
+        return jsonify({'error': 'Invalid pin'}), 400
+
+    component = component_registry.get_component(pin)
+
+    if not component:
+        return jsonify({'success': False, 'error': 'No component assigned to this pin'}), 404
+
+    data = component_data.get(pin, {})
+
     return jsonify({
         'success': True,
-        'pin': dht22_pin,
-        'running': dht22_running,
-        'data': dht22_data
+        'pin': pin,
+        'running': component_running.get(pin, False),
+        'component_type': component.__class__.__name__,
+        'data': data
     })
 
-@app.route('/api/dht22/stop', methods=['POST'])
-def stop_dht22():
-    """Stop DHT22 sensor reading"""
-    global dht22_running, dht22_pin, pin_changes
+@app.route('/api/component/<int:pin>/remove', methods=['POST'])
+def remove_component(pin):
+    """Remove component from a pin"""
+    global pin_changes
 
-    if dht22_running:
-        dht22_running = False
-        if dht22_thread:
-            dht22_thread.join()
+    if pin not in GPIO_PINS:
+        return jsonify({'error': 'Invalid pin'}), 400
 
-        # Reset pin to normal input mode
-        if dht22_pin:
-            pin_states[dht22_pin]['mode'] = 'IN'
-            pin_states[dht22_pin]['dht22'] = False
-            dht22_pin = None
-            pin_changes += 1
+    # Stop reading thread if running
+    if pin in component_running:
+        component_running[pin] = False
+        if pin in component_threads:
+            component_threads[pin].join()
+            del component_threads[pin]
 
-    return jsonify({'success': True, 'running': False})
+    # Remove component from registry
+    component_registry.remove_component(pin)
+
+    # Reset pin to normal input mode
+    pin_states[pin]['mode'] = 'IN'
+    pin_states[pin]['component'] = False
+    pin_changes += 1
+
+    # Clean up component data
+    if pin in component_data:
+        del component_data[pin]
+
+    return jsonify({'success': True, 'pin': pin, 'running': False})
 
 def save_configuration(filename='config.yaml'):
     """Save current pin configuration to YAML file"""
@@ -765,7 +785,7 @@ def load_configuration(filename='config.yaml'):
 
 def cleanup():
     """Cleanup GPIO on exit"""
-    global clock_running, dht22_running
+    global clock_running
 
     # Stop clock if running
     if clock_running:
@@ -773,11 +793,14 @@ def cleanup():
         if clock_thread:
             clock_thread.join()
 
-    # Stop DHT22 if running
-    if dht22_running:
-        dht22_running = False
-        if dht22_thread:
-            dht22_thread.join()
+    # Stop all component reading threads
+    for pin in list(component_running.keys()):
+        component_running[pin] = False
+    for thread in component_threads.values():
+        thread.join()
+
+    # Cleanup all components
+    component_registry.cleanup_all()
 
     # Stop all flashing
     for pin in flashing_pins.keys():

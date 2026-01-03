@@ -1,0 +1,480 @@
+{
+  "dht22": {
+    "name": "DHT22 Temperature & Humidity Sensor",
+    "type": "producer",
+    "manufacturer": "Aosong",
+    "datasheet": "https://www.sparkfun.com/datasheets/Sensors/Temperature/DHT22.pdf",
+    "tutorials": [
+      "https://learn.adafruit.com/dht",
+      "https://www.circuitbasics.com/how-to-set-up-the-dht22-humidity-sensor-on-the-raspberry-pi/"
+    ],
+    "pinout": {
+      "type": "inline",
+      "orientation": "left-to-right",
+      "pins": [
+        {
+          "num": 1,
+          "name": "VCC",
+          "type": "power",
+          "voltage": "3.3-5V",
+          "color": "red"
+        },
+        {
+          "num": 2,
+          "name": "DATA",
+          "type": "gpio",
+          "gpio": "any",
+          "color": "yellow",
+          "note": "10kΩ pull-up recommended"
+        },
+        {
+          "num": 3,
+          "name": "NC",
+          "type": "unused"
+        },
+        {
+          "num": 4,
+          "name": "GND",
+          "type": "ground",
+          "color": "black"
+        }
+      ]
+    },
+    "requirements": {
+      "gpio_pins": 1,
+      "pin_type": "flexible",
+      "power": "3.3V or 5V",
+      "notes": "Some modules have built-in pull-up resistor"
+    },
+    "outputs": {
+      "temperature": {
+        "type": "float",
+        "unit": "°C",
+        "range": [-40, 80],
+        "accuracy": "±0.5°C"
+      },
+      "humidity": {
+        "type": "float",
+        "unit": "%",
+        "range": [0, 100],
+        "accuracy": "±2%"
+      }
+    },
+    "libraries": [
+      {
+        "name": "Adafruit_DHT",
+        "install": "pip install Adafruit_DHT --break-system-packages",
+        "import": "import Adafruit_DHT"
+      }
+    ],
+    "test_code": {
+      "language": "python",
+      "code": "humidity, temperature = Adafruit_DHT.read_retry(22, DATA_PIN)"
+    }
+  },
+
+  "st7789": {
+    "name": "ST7789 2.0\" TFT LCD Display",
+    "type": "consumer",
+    "manufacturer": "Sitronix",
+    "datasheet": "https://www.displayfuture.com/Display/datasheet/controller/ST7789.pdf",
+    "tutorials": [
+      "https://learn.adafruit.com/adafruit-1-14-240x135-color-tft-breakout",
+      "https://luma-lcd.readthedocs.io/"
+    ],
+    "pinout": {
+      "type": "module",
+      "layout": "vertical-header",
+      "pins": [
+        {
+          "name": "GND",
+          "type": "ground",
+          "required": true,
+          "color": "black"
+        },
+        {
+          "name": "VCC",
+          "type": "power",
+          "voltage": "3.3V",
+          "required": true,
+          "color": "red"
+        },
+        {
+          "name": "SCL",
+          "type": "spi",
+          "gpio": 11,
+          "function": "SCLK",
+          "required": true,
+          "auto_assign": true,
+          "color": "orange"
+        },
+        {
+          "name": "SDA",
+          "type": "spi",
+          "gpio": 10,
+          "function": "MOSI",
+          "required": true,
+          "auto_assign": true,
+          "color": "blue"
+        },
+        {
+          "name": "RES",
+          "type": "gpio",
+          "gpio": "flexible",
+          "required": true,
+          "note": "Reset pin",
+          "color": "yellow"
+        },
+        {
+          "name": "DC",
+          "type": "gpio",
+          "gpio": "flexible",
+          "required": true,
+          "note": "Data/Command",
+          "color": "green"
+        },
+        {
+          "name": "CS",
+          "type": "gpio",
+          "gpio": 8,
+          "required": false,
+          "note": "Can tie to GND if only display on SPI",
+          "color": "purple"
+        },
+        {
+          "name": "BLK",
+          "type": "power",
+          "voltage": "3.3V",
+          "required": false,
+          "note": "Backlight control",
+          "color": "white"
+        }
+      ]
+    },
+    "requirements": {
+      "interface": "SPI0",
+      "gpio_pins": 2,
+      "optional_pins": 1,
+      "notes": "Hardware SPI recommended for best performance"
+    },
+    "inputs": {
+      "text": {
+        "type": "string",
+        "description": "Text to display"
+      },
+      "image": {
+        "type": "PIL.Image",
+        "description": "PIL Image object to render"
+      }
+    },
+    "specifications": {
+      "resolution": "240x320",
+      "colors": "65K (RGB565)",
+      "viewing_angle": "160°",
+      "size": "2.0 inches"
+    },
+    "libraries": [
+      {
+        "name": "luma.lcd",
+        "install": "pip install luma.lcd --break-system-packages",
+        "import": "from luma.lcd.device import st7789"
+      }
+    ]
+  },
+
+  "28byj48": {
+    "name": "28BYJ-48 Stepper Motor with ULN2003 Driver",
+    "type": "consumer",
+    "manufacturer": "Various",
+    "datasheet": "http://www.4tronix.co.uk/arduino/Stepper-Motors.php",
+    "tutorials": [
+      "https://www.electronicshub.org/raspberry-pi-stepper-motor-interface/",
+      "https://www.raspberrypi-spy.co.uk/2018/09/28byj-48-stepper-motor-with-uln2003-driver-and-raspberry-pi/"
+    ],
+    "pinout": {
+      "type": "wire-leads",
+      "driver": "ULN2003",
+      "motor_connector": "5-pin JST (pre-wired to driver)",
+      "driver_to_rpi": [
+        {
+          "name": "IN1",
+          "type": "gpio",
+          "gpio": "flexible",
+          "required": true,
+          "color": "varies"
+        },
+        {
+          "name": "IN2",
+          "type": "gpio",
+          "gpio": "flexible",
+          "required": true,
+          "color": "varies"
+        },
+        {
+          "name": "IN3",
+          "type": "gpio",
+          "gpio": "flexible",
+          "required": true,
+          "color": "varies"
+        },
+        {
+          "name": "IN4",
+          "type": "gpio",
+          "gpio": "flexible",
+          "required": true,
+          "color": "varies"
+        },
+        {
+          "name": "VCC",
+          "type": "power",
+          "voltage": "5V",
+          "required": true,
+          "note": "External supply recommended",
+          "color": "red"
+        },
+        {
+          "name": "GND",
+          "type": "ground",
+          "required": true,
+          "color": "black"
+        }
+      ]
+    },
+    "requirements": {
+      "gpio_pins": 4,
+      "pin_type": "flexible",
+      "pins_per_motor": 4,
+      "power": "External 5V supply recommended",
+      "notes": "Use consecutive GPIOs for cleaner code"
+    },
+    "inputs": {
+      "angle": {
+        "type": "float",
+        "unit": "degrees",
+        "range": [0, 360],
+        "description": "Target angle to move to"
+      },
+      "speed": {
+        "type": "float",
+        "unit": "seconds per step",
+        "range": [0.001, 0.01],
+        "default": 0.002,
+        "description": "Step delay for speed control"
+      }
+    },
+    "specifications": {
+      "steps_per_revolution": 2048,
+      "stride_angle": "5.625°/64",
+      "gear_ratio": "64:1",
+      "actual_angle_per_step": "0.17578125°",
+      "holding_torque": "~300 g·cm",
+      "rated_voltage": "5V DC",
+      "current": "~240mA"
+    },
+    "warnings": [
+      {
+        "severity": "medium",
+        "message": "Each motor draws ~240mA - use external power for multiple motors"
+      }
+    ],
+    "libraries": [
+      {
+        "name": "RPi.GPIO",
+        "install": "pip install RPi.GPIO --break-system-packages",
+        "import": "from RPi import GPIO"
+      }
+    ]
+  },
+
+  "sg90": {
+    "name": "SG90 Micro Servo Motor",
+    "type": "consumer",
+    "manufacturer": "TowerPro",
+    "datasheet": "http://www.towerpro.com.tw/product/sg90-7/",
+    "tutorials": [
+      "https://www.raspberrypi-spy.co.uk/2018/01/control-servo-motors-raspberry-pi/",
+      "https://learn.adafruit.com/adafruits-raspberry-pi-lesson-8-using-a-servo-motor"
+    ],
+    "pinout": {
+      "type": "wire-leads",
+      "connector": "3-pin JST",
+      "pins": [
+        {
+          "name": "GND",
+          "type": "ground",
+          "color": "brown",
+          "wire_color": "brown/black",
+          "required": true
+        },
+        {
+          "name": "VCC",
+          "type": "power",
+          "voltage": "4.8-6V",
+          "color": "red",
+          "wire_color": "red",
+          "required": true,
+          "warning": "DO NOT power from RPi pins - use external supply"
+        },
+        {
+          "name": "PWM",
+          "type": "gpio",
+          "gpio": "pwm_capable",
+          "color": "orange",
+          "wire_color": "orange/yellow/white",
+          "required": true,
+          "note": "Use hardware PWM pins (12, 13, 18, 19) for best results"
+        }
+      ]
+    },
+    "requirements": {
+      "gpio_pins": 1,
+      "pin_type": "pwm",
+      "preferred_pins": [12, 13, 18, 19],
+      "power": "External 5V supply required",
+      "notes": [
+        "Draws 100-250mA under load",
+        "Share GND between RPi and power supply",
+        "Software PWM may cause jitter"
+      ]
+    },
+    "inputs": {
+      "angle": {
+        "type": "float",
+        "unit": "degrees",
+        "range": [0, 180],
+        "description": "Target servo angle"
+      }
+    },
+    "specifications": {
+      "rotation": "~180° (160-180° typical)",
+      "pulse_width": {
+        "min": "1ms (0°)",
+        "center": "1.5ms (90°)",
+        "max": "2ms (180°)"
+      },
+      "frequency": "50Hz (20ms period)",
+      "torque": "1.8 kg·cm (4.8V)",
+      "speed": "0.1s/60° (4.8V)",
+      "deadband": "±3-5°",
+      "current": "100-250mA"
+    },
+    "warnings": [
+      {
+        "severity": "high",
+        "message": "Powering from RPi pins can cause brownouts/corruption",
+        "recommendation": "Use external 5V supply with shared GND"
+      },
+      {
+        "severity": "medium",
+        "message": "Software PWM on non-PWM pins causes jitter",
+        "recommendation": "Use GPIO 12, 13, 18, or 19 for hardware PWM"
+      }
+    ],
+    "calibration": {
+      "required": true,
+      "reason": "Each SG90 has different pulse width to angle mapping",
+      "procedure": "Test min/max pulse widths, map to actual rotation range"
+    },
+    "libraries": [
+      {
+        "name": "pigpio",
+        "install": "pip install pigpio --break-system-packages",
+        "import": "import pigpio",
+        "note": "Best timing, requires pigpiod daemon"
+      },
+      {
+        "name": "gpiozero",
+        "install": "pip install gpiozero --break-system-packages",
+        "import": "from gpiozero import Servo",
+        "note": "Higher-level, uses pigpio if available"
+      }
+    ]
+  },
+
+  "button": {
+    "name": "Push Button / Toggle Switch",
+    "type": "producer",
+    "pinout": {
+      "type": "simple",
+      "pins": [
+        {
+          "name": "SIGNAL",
+          "type": "gpio",
+          "gpio": "any",
+          "required": true,
+          "note": "Connect to GPIO pin"
+        },
+        {
+          "name": "GND",
+          "type": "ground",
+          "required": true,
+          "note": "Other terminal to ground"
+        }
+      ]
+    },
+    "requirements": {
+      "gpio_pins": 1,
+      "pin_type": "flexible",
+      "notes": "Internal pull-up resistor enabled in software"
+    },
+    "outputs": {
+      "state": {
+        "type": "boolean",
+        "description": "Button pressed (True) or released (False)"
+      }
+    },
+    "libraries": [
+      {
+        "name": "gpiozero",
+        "install": "pip install gpiozero --break-system-packages",
+        "import": "from gpiozero import Button"
+      }
+    ]
+  },
+
+  "led": {
+    "name": "LED with Current-Limiting Resistor",
+    "type": "consumer",
+    "pinout": {
+      "type": "simple",
+      "pins": [
+        {
+          "name": "ANODE (+)",
+          "type": "gpio",
+          "gpio": "any",
+          "required": true,
+          "note": "Long leg, via resistor to GPIO"
+        },
+        {
+          "name": "CATHODE (-)",
+          "type": "ground",
+          "required": true,
+          "note": "Short leg to ground"
+        }
+      ]
+    },
+    "requirements": {
+      "gpio_pins": 1,
+      "pin_type": "flexible",
+      "notes": "Use 220Ω-1kΩ resistor in series"
+    },
+    "inputs": {
+      "state": {
+        "type": "boolean",
+        "description": "LED on (True) or off (False)"
+      },
+      "brightness": {
+        "type": "float",
+        "range": [0, 1],
+        "description": "PWM brightness (requires PWM-capable pin)"
+      }
+    },
+    "libraries": [
+      {
+        "name": "gpiozero",
+        "install": "pip install gpiozero --break-system-packages",
+        "import": "from gpiozero import LED"
+      }
+    ]
+  }
+}
