@@ -759,16 +759,23 @@ async function readPin(pin) {
 function setLayout(layout) {
     currentLayout = layout;
     const container = document.getElementById('pin-container');
+    const mainContent = document.querySelector('.main-content');
     const hatBtn = document.getElementById('btn-hat-mode');
     const headerBtn = document.getElementById('btn-header-mode');
 
     // Update button states
     hatBtn.classList.remove('active');
     headerBtn.classList.remove('active');
+
+    // Update main-content layout class
+    mainContent.classList.remove('layout-hat', 'layout-header');
+
     if (layout === 'hat') {
         hatBtn.classList.add('active');
+        mainContent.classList.add('layout-hat');
     } else {
         headerBtn.classList.add('active');
+        mainContent.classList.add('layout-header');
     }
 
     if (layout === 'hat') {

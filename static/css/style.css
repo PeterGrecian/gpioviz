@@ -156,10 +156,21 @@ header h1 {
 
 .main-content {
     display: flex;
-    flex-direction: column;
     gap: 15px;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+}
+
+/* HAT mode: stack vertically */
+.main-content.layout-hat {
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Header mode: side by side */
+.main-content.layout-header {
+    flex-direction: row;
+    align-items: flex-start;
 }
 
 .gpio-board {
@@ -507,11 +518,23 @@ header h1 {
     background: rgba(255,255,255,0.95);
     border-radius: 8px;
     padding: 12px 18px;
-    margin-top: 15px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+}
+
+/* HAT mode: full width below */
+.main-content.layout-hat .tool-info-panel {
+    margin-top: 15px;
     max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
+    width: 100%;
+}
+
+/* Header mode: fixed width to the side */
+.main-content.layout-header .tool-info-panel {
+    margin-top: 0;
+    width: 350px;
+    max-height: 600px;
+    overflow-y: auto;
 }
 
 .tool-info-panel h3 {

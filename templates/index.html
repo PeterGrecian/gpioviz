@@ -55,7 +55,7 @@
             <span id="sensor-readings" style="display: none;"></span>
         </div>
 
-        <div class="main-content">
+        <div class="main-content layout-header">
         <div class="gpio-board">
             <div class="layout-toggle">
                 <button class="btn" id="btn-hat-mode">Hat Mode</button>
@@ -326,6 +326,16 @@
             </div>
         </div>
 
+        <!-- Tool Info Panel -->
+        <div class="tool-info-panel" id="tool-info">
+            <h3 id="tool-info-title">⚠ GPIO Safety</h3>
+            <div id="tool-info-content">
+                <p><strong>Multifunction pins</strong> (I2C, SPI, UART) are set to GPIO by default.</p>
+                <p><strong>ID_SD/ID_SC (turquoise LEDs):</strong> Reserved for HAT EEPROM. Can be used as GPIO but not recommended.</p>
+                <p><strong>Pins 3 & 5:</strong> Have 1.8kΩ pull-up resistors, always pulled HIGH by default.</p>
+                <p><strong>⚠ CRITICAL:</strong> All GPIO pins are 3.3V. Never connect 5V signals. <strong>Always use 1kΩ-10kΩ resistors</strong> between pins to prevent damage from accidental shorts (>16mA can permanently damage pins or the SoC).</p>
+            </div>
+        </div>
 
         </div>
 
@@ -337,17 +347,6 @@
                 <p><strong>Temperature:</strong> <span id="dht22-temp">--</span>°C</p>
                 <p><strong>Humidity:</strong> <span id="dht22-humidity">--</span>%</p>
                 <p><strong>Last Updated:</strong> <span id="dht22-updated">--</span></p>
-            </div>
-        </div>
-
-        <!-- Tool Info Panel -->
-        <div class="tool-info-panel" id="tool-info">
-            <h3 id="tool-info-title">⚠ GPIO Safety</h3>
-            <div id="tool-info-content">
-                <p><strong>Multifunction pins</strong> (I2C, SPI, UART) are set to GPIO by default.</p>
-                <p><strong>ID_SD/ID_SC (turquoise LEDs):</strong> Reserved for HAT EEPROM. Can be used as GPIO but not recommended.</p>
-                <p><strong>Pins 3 & 5:</strong> Have 1.8kΩ pull-up resistors, always pulled HIGH by default.</p>
-                <p><strong>⚠ CRITICAL:</strong> All GPIO pins are 3.3V. Never connect 5V signals. <strong>Always use 1kΩ-10kΩ resistors</strong> between pins to prevent damage from accidental shorts (>16mA can permanently damage pins or the SoC).</p>
             </div>
         </div>
     </div>
