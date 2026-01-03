@@ -55,6 +55,7 @@ class DHT22Component(ProducerComponent):
             }
         }
 
+        print(f"DHT22 INIT: name='{name}', data_pin={self.data_pin} (type: {type(self.data_pin)}), retries={self.retries}, polling={self.polling_interval}")
         logger.info(f"DHT22 '{name}' initialized on GPIO {self.data_pin}")
 
     def read(self) -> Dict[str, Optional[float]]:
