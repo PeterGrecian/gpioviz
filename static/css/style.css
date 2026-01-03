@@ -541,7 +541,7 @@ body.peripheral-tool-active .pin-indicator {
     }
 }
 
-.gpio-notice {
+.tool-info-panel {
     background: rgba(255,255,255,0.95);
     border-radius: 8px;
     padding: 12px 18px;
@@ -552,20 +552,31 @@ body.peripheral-tool-active .pin-indicator {
     margin-right: auto;
 }
 
-.gpio-notice h3 {
-    color: #e74c3c;
+.tool-info-panel h3 {
+    color: #1976d2;
     margin: 0 0 8px 0;
     font-size: 1em;
 }
 
-.gpio-notice p {
+.tool-info-panel p {
     color: #2c3e50;
     font-size: 12px;
     line-height: 1.5;
     margin: 5px 0;
 }
 
-.gpio-notice strong {
+.tool-info-panel ul {
+    margin: 8px 0 8px 20px;
+    color: #2c3e50;
+    font-size: 12px;
+}
+
+.tool-info-panel li {
+    margin-bottom: 5px;
+    line-height: 1.5;
+}
+
+.tool-info-panel strong {
     color: #c0392b;
 }
 
@@ -662,12 +673,12 @@ body.peripheral-tool-active .pin-indicator {
         width: 100%;
     }
 
-    .gpio-notice {
+    .tool-info-panel {
         font-size: 11px;
         padding: 10px 12px;
     }
 
-    .gpio-notice h3 {
+    .tool-info-panel h3 {
         font-size: 0.9em;
     }
 }

@@ -59,6 +59,73 @@ async function loadVersionInfo() {
     });
 }
 
+function updateToolInfo(tool) {
+    const toolInfoTitle = document.getElementById('tool-info-title');
+    const toolInfoContent = document.getElementById('tool-info-content');
+
+    const toolInfo = {
+        'toggle': {
+            title: '⚠ GPIO Safety',
+            content: `
+                <p><strong>Multifunction pins</strong> (I2C, SPI, UART) are set to GPIO by default.</p>
+                <p><strong>ID_SD/ID_SC (turquoise LEDs):</strong> Reserved for HAT EEPROM. Can be used as GPIO but not recommended.</p>
+                <p><strong>Pins 3 & 5:</strong> Have 1.8kΩ pull-up resistors, always pulled HIGH by default.</p>
+                <p><strong>⚠ CRITICAL:</strong> All GPIO pins are 3.3V. Never connect 5V signals. <strong>Always use 1kΩ-10kΩ resistors</strong> between pins to prevent damage from accidental shorts (>16mA can permanently damage pins or the SoC).</p>
+            `
+        },
+        'config': {
+            title: 'ℹ I/O Config Tool',
+            content: `
+                <p><strong>Click any GPIO pin</strong> to toggle between INPUT and OUTPUT modes.</p>
+                <p><strong>OUTPUT mode:</strong> You control the pin state (HIGH/LOW). Use for LEDs, relays, etc.</p>
+                <p><strong>INPUT mode:</strong> Read voltage from external circuits. Pin state updates automatically.</p>
+                <p><strong>Tip:</strong> Always set pins to INPUT when reading sensors to prevent damage.</p>
+            `
+        },
+        'flash': {
+            title: '⚡ Flash Tool',
+            content: `
+                <p><strong>Click any GPIO pin</strong> to toggle continuous flashing at ${FLASH_SPEED}ms intervals.</p>
+                <p><strong>Use cases:</strong> Testing LEDs, creating blink patterns, troubleshooting connections.</p>
+                <p><strong>Note:</strong> Pin automatically switches to OUTPUT mode when flashing starts.</p>
+                <p><strong>Tip:</strong> Use flash to identify which physical pin corresponds to a GPIO number.</p>
+            `
+        },
+        'peripheral': {
+            title: '🔧 Peripheral Tool',
+            content: `
+                <p><strong>Click pins with alternative functions</strong> to cycle through available modes:</p>
+                <ul>
+                    <li><strong>I2C (Pins 3, 5):</strong> Auto-enables i2c_arm and loads kernel modules</li>
+                    <li><strong>SPI (Pins 19, 21, 23, 24, 26):</strong> Auto-enables SPI interface</li>
+                    <li><strong>UART (Pins 8, 10):</strong> May require reboot for full functionality</li>
+                    <li><strong>PWM (Pins 12, 32, 33, 35):</strong> Software PWM via RPi.GPIO</li>
+                </ul>
+                <p><strong>⚠ Warning:</strong> Enabling peripherals disables GPIO control for those pins.</p>
+            `
+        },
+        'dht22': {
+            title: '🌡 DHT22 Sensor Tool',
+            content: `
+                <p><strong>Click any GPIO pin</strong> to assign a DHT22 temperature/humidity sensor.</p>
+                <p><strong>Wiring:</strong></p>
+                <ul>
+                    <li>VCC → 3.3V or 5V power pin</li>
+                    <li>DATA → Selected GPIO pin (with 10kΩ pull-up resistor to VCC)</li>
+                    <li>GND → Ground pin</li>
+                </ul>
+                <p><strong>Readings:</strong> Temperature (°C) and Humidity (%) update every 2 seconds.</p>
+                <p><strong>Requirements:</strong> Adafruit_DHT library (installed via requirements.txt)</p>
+            `
+        }
+    };
+
+    if (toolInfo[tool]) {
+        toolInfoTitle.innerHTML = toolInfo[tool].title;
+        toolInfoContent.innerHTML = toolInfo[tool].content;
+    }
+}
+
 function setActiveTool(tool) {
     // Deactivate all tools
     toggleToolActive = false;
@@ -110,6 +177,10 @@ function setActiveTool(tool) {
 
     // Update status line
     document.getElementById('current-tool').textContent = currentTool;
+
+    // Update tool info panel
+    updateToolInfo(tool);
+
     updateUI();
 }
 
