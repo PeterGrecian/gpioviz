@@ -66,6 +66,7 @@ class DHT22Component(ProducerComponent):
             Values are None if read failed
         """
         try:
+            print(f"DHT22 '{self.name}': Attempting read on BCM GPIO {self.data_pin}...")
             humidity, temperature = Adafruit_DHT.read_retry(
                 self.SENSOR_TYPE,
                 self.data_pin,
@@ -73,12 +74,14 @@ class DHT22Component(ProducerComponent):
             )
 
             if humidity is not None and temperature is not None:
+                print(f"DHT22 '{self.name}': ✓ SUCCESS - {temperature:.1f}°C, {humidity:.1f}%")
                 logger.debug(f"DHT22 '{self.name}': {temperature:.1f}°C, {humidity:.1f}%")
                 return {
                     'temperature': round(temperature, 1),
                     'humidity': round(humidity, 1)
                 }
             else:
+                print(f"DHT22 '{self.name}': ✗ FAILED - humidity={humidity}, temp={temperature}")
                 logger.warning(f"DHT22 '{self.name}': Failed to read sensor")
                 return {
                     'temperature': None,
@@ -86,6 +89,7 @@ class DHT22Component(ProducerComponent):
                 }
 
         except Exception as e:
+            print(f"DHT22 '{self.name}': ✗ EXCEPTION - {e}")
             logger.error(f"DHT22 '{self.name}': Error reading sensor: {e}")
             return {
                 'temperature': None,

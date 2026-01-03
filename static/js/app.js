@@ -556,7 +556,7 @@ async function configureDHT22OnPin(pin) {
                 component_type: 'dht22',
                 name: `DHT22_${pin}`,
                 gpio_pins: { data: pin },
-                config: { polling: 2, retries: 3 }
+                config: { polling: 3, retries: 15 }  // More retries, longer interval
             })
         });
 
