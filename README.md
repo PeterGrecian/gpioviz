@@ -1,22 +1,27 @@
 # Raspberry Pi GPIO Visualizer
 
-A Python Flask web application for visualizing, configuring, and controlling all 40 GPIO pins on a Raspberry Pi Zero. Features real-time control with visual flashing effects.
+A Python Flask web application for visualizing, configuring, and controlling all 40 GPIO pins on Raspberry Pi. Features real-time control, peripheral configuration, sensor components, and visual effects.
 
 ## Features
 
-- Visual representation of all 40 pins on the Raspberry Pi Zero header
+- Visual representation of all 40 pins on the Raspberry Pi GPIO header
+- Two layout modes: HAT mode (4×8 grid) and Header mode (2×20)
 - Configure pins as INPUT or OUTPUT
 - Control output pins (HIGH/LOW)
-- Flash pins at configurable speeds (100ms - 2000ms)
+- Flash pins at configurable speeds
+- **Runtime peripheral configuration** (I2C, SPI, UART, PWM) via UI - no config.txt editing needed
+- **Component system** for sensors and displays (DHT22 temperature/humidity sensor included)
+- Clock display using GPIO LEDs
+- Save/load pin configurations (YAML)
 - Real-time state updates
 - Clean, responsive web interface
 - Color-coded pins (GPIO, Power, Ground, Reserved)
 
 ## Requirements
 
-- Raspberry Pi Zero (or any Raspberry Pi with 40-pin header)
+- Raspberry Pi with 40-pin GPIO header (Pi Zero, Zero 2, 3, 4, 5)
 - Python 3.7+
-- Root/sudo access for GPIO control
+- Root/sudo access for GPIO control and peripheral configuration
 
 ## Installation
 

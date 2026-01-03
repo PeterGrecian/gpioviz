@@ -1,10 +1,28 @@
 # Enabling Peripheral Functions on Raspberry Pi
 
-GPIO pins can be configured to use their alternative functions (I2C, SPI, UART, PWM, etc.) instead of standard GPIO mode. This is done through Device Tree configuration.
+GPIO pins can be configured to use their alternative functions (I2C, SPI, UART, PWM, etc.) instead of standard GPIO mode.
 
-## Configuration Methods
+## Runtime Configuration (Recommended)
 
-### Method 1: Using raspi-config (Recommended for beginners)
+**The GPIO Visualizer UI includes a Peripheral tool** that enables/disables peripherals at runtime without editing config files or rebooting:
+
+1. Click the **🔧 Peripheral** tool button
+2. Click on any pin that has alternative functions
+3. The pin will cycle through available modes: GPIO → I2C → SPI → UART → etc.
+
+This uses `dtparam` commands under the hood to enable peripherals on-demand.
+
+### Supported Peripherals via UI:
+- **I2C** (Pins 3, 5) - Auto-enables i2c_arm and loads kernel modules
+- **SPI** (Pins 19, 21, 23, 24, 26) - Auto-enables SPI interface
+- **UART** (Pins 8, 10) - Limited support (may require reboot)
+- **PWM** (Pins 12, 32, 33, 35) - Software PWM via RPi.GPIO
+
+## Manual Configuration Methods
+
+If you need persistent configuration across reboots:
+
+### Method 1: Using raspi-config
 ```bash
 sudo raspi-config
 ```
@@ -18,9 +36,7 @@ sudo nano /boot/firmware/config.txt
 ```
 (On older systems, use `/boot/config.txt`)
 
-## Peripheral Activation Commands
-
-Add these lines to `/boot/firmware/config.txt` to enable peripherals:
+Add these lines to enable peripherals:
 
 ### I2C (Pins 3, 5 - GPIO2/GPIO3)
 ```
@@ -109,9 +125,11 @@ ls /dev/serial*
 
 ⚠️ **WARNING**: Enabling peripheral functions on a pin **disables GPIO control** for that pin. The pin can no longer be controlled via RPi.GPIO or similar GPIO libraries while the peripheral is active.
 
-⚠️ **CRITICAL**: Before enabling peripherals, ensure no conflicting GPIO control is running. Disable the gpioviz application if testing peripheral functions.
+⚠️ **CRITICAL**: When using the UI Peripheral tool, the application will attempt to enable the peripheral using `dtparam` at runtime. This works for I2C and SPI, but UART and some other peripherals may require editing config.txt and rebooting.
 
 ⚠️ **Pull-up Resistors**: Pins 3 & 5 (GPIO2/3) have permanent 1.8kΩ pull-up resistors for I2C. These cannot be disabled.
+
+⚠️ **ID_SD/ID_SC (Pins 27/28)**: These pins are reserved for HAT EEPROM identification and should not be used for general GPIO. The application marks them as reserved.
 
 ## Sources
 
