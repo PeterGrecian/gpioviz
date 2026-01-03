@@ -154,45 +154,6 @@ header h1 {
     transform: scale(1.05);
 }
 
-/* Flash tool cursor - whole cell clickable */
-body.flash-tool-active {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚡</text></svg>') 12 12, auto;
-}
-
-body.flash-tool-active .pin.gpio {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚡</text></svg>') 12 12, pointer;
-}
-
-body.flash-tool-active .pin-indicator {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚡</text></svg>') 12 12, pointer;
-}
-
-/* Config tool cursor - whole cell clickable */
-body.config-tool-active {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚙</text></svg>') 12 12, auto;
-}
-
-body.config-tool-active .pin.gpio {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚙</text></svg>') 12 12, pointer;
-}
-
-body.config-tool-active .pin-indicator {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">⚙</text></svg>') 12 12, pointer;
-}
-
-/* Peripheral tool cursor - whole cell clickable */
-body.peripheral-tool-active {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">☠</text></svg>') 12 12, auto;
-}
-
-body.peripheral-tool-active .pin.gpio {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">☠</text></svg>') 12 12, pointer;
-}
-
-body.peripheral-tool-active .pin-indicator {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">☠</text></svg>') 12 12, pointer;
-}
-
 .main-content {
     display: flex;
     gap: 15px;
@@ -777,27 +738,28 @@ body.peripheral-tool-active .pin-indicator {
     font-weight: 700;
 }
 
-/* Tool Cursors */
-body.toggle-tool-active .pin-indicator {
+/* Tool Cursors - apply to entire GPIO board */
+body.toggle-tool-active .gpio-board,
+body.toggle-tool-active .gpio-board * {
     cursor: pointer !important;
 }
 
-body.config-tool-active .pin,
-body.config-tool-active .pin-indicator {
+body.config-tool-active .gpio-board,
+body.config-tool-active .gpio-board * {
     cursor: cell !important;
 }
 
-body.flash-tool-active .pin,
-body.flash-tool-active .pin-indicator {
+body.flash-tool-active .gpio-board,
+body.flash-tool-active .gpio-board * {
     cursor: crosshair !important;
 }
 
-body.peripheral-tool-active .pin,
-body.peripheral-tool-active .pin-indicator {
+body.peripheral-tool-active .gpio-board,
+body.peripheral-tool-active .gpio-board * {
     cursor: help !important;
 }
 
-body.dht22-tool-active .pin,
-body.dht22-tool-active .pin-indicator {
+body.dht22-tool-active .gpio-board,
+body.dht22-tool-active .gpio-board * {
     cursor: copy !important;
 }
