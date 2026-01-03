@@ -15,6 +15,8 @@ The GPIO visualizer is designed to work with a screw terminal HAT that has:
   - ID_SD/ID_SC pins: Turquoise/dim LEDs
   - GPIO pins: Green when HIGH, dark when LOW
 
+**Note:** The 52pi EP-0129 is a simple GPIO breakout board without HAT EEPROM. It will not be auto-detected via the HAT specification's ID EEPROM (pins 27/28). The application's HAT detection feature will show "No HAT detected" - this is expected and does not affect functionality.
+
 ## Layout Modes
 
 - **Hat Mode**: 4 rows × 8 columns arranged to match the physical HAT layout (default)
