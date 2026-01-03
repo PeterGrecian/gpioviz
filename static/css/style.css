@@ -791,6 +791,9 @@ body.peripheral-tool-active .gpio-board * {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><text x="4" y="24" font-size="24">🔧</text></svg>') 16 16, help !important;
 }
 
+body.dht22-tool-active,
+body.dht22-tool-active *,
+body.dht22-tool-active .main-content,
 body.dht22-tool-active .gpio-board,
 body.dht22-tool-active .gpio-board * {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="%23e67e22" stroke="%23d35400" stroke-width="2"/><text x="16" y="22" font-size="18" font-weight="bold" fill="white" text-anchor="middle">T</text></svg>') 16 16, pointer !important;
