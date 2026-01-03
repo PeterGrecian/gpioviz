@@ -22,6 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('pin-container');
     originalHTML = container.innerHTML; // Save original layout
 
+    // Initialize menu and button event listeners first
+    initializeMenuListeners();
+
     // Set default layout to Hat mode BEFORE initializing listeners
     setLayout('hat');
 
@@ -36,6 +39,109 @@ document.addEventListener('DOMContentLoaded', () => {
     // For inputs: shows actual GPIO voltage reading
     setInterval(updatePinStates, 500);
 });
+
+function initializeMenuListeners() {
+    // Menu system - click-based dropdowns
+    document.querySelectorAll('.menu-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const menuItem = button.parentElement;
+            const isOpen = menuItem.classList.contains('open');
+
+            // Close all menus
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('open');
+            });
+            document.querySelectorAll('.menu-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Toggle this menu
+            if (!isOpen) {
+                menuItem.classList.add('open');
+                button.classList.add('active');
+            }
+        });
+    });
+
+    // Close menus when clicking outside
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('open');
+        });
+        document.querySelectorAll('.menu-button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+    });
+
+    // Menu items - File
+    document.getElementById('menu-save')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        saveConfiguration();
+        closeAllMenus();
+    });
+    document.getElementById('menu-load')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadConfiguration();
+        closeAllMenus();
+    });
+
+    // Menu items - Tools
+    document.getElementById('menu-toggle')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveTool('toggle');
+        closeAllMenus();
+    });
+    document.getElementById('menu-config')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveTool('config');
+        closeAllMenus();
+    });
+    document.getElementById('menu-flash')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveTool('flash');
+        closeAllMenus();
+    });
+    document.getElementById('menu-peripheral')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveTool('peripheral');
+        closeAllMenus();
+    });
+    document.getElementById('menu-dht22')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveTool('dht22');
+        closeAllMenus();
+    });
+
+    // Menu items - Apps
+    document.getElementById('menu-clock')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleClock();
+        closeAllMenus();
+    });
+    document.getElementById('menu-test-sequence')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleTestSequence();
+        closeAllMenus();
+    });
+    document.getElementById('menu-all-input')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setAllInput();
+        closeAllMenus();
+    });
+
+    // Reset button
+    document.getElementById('reset-all').addEventListener('click', resetAll);
+
+    // Layout toggle buttons
+    document.getElementById('btn-hat-mode').addEventListener('click', () => setLayout('hat'));
+    document.getElementById('btn-header-mode').addEventListener('click', () => setLayout('header'));
+}
+
+function closeAllMenus() {
+    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('open'));
+    document.querySelectorAll('.menu-button').forEach(btn => btn.classList.remove('active'));
+}
 
 async function loadVersionInfo() {
     try {
@@ -185,111 +291,7 @@ function setActiveTool(tool) {
 }
 
 function initializeEventListeners() {
-    // Menu system - click-based dropdowns
-    document.querySelectorAll('.menu-button').forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const menuItem = button.parentElement;
-            const isOpen = menuItem.classList.contains('open');
-
-            // Close all menus
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('open');
-            });
-            document.querySelectorAll('.menu-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Toggle this menu
-            if (!isOpen) {
-                menuItem.classList.add('open');
-                button.classList.add('active');
-            }
-        });
-    });
-
-    // Close menus when clicking outside
-    document.addEventListener('click', () => {
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.classList.remove('open');
-        });
-        document.querySelectorAll('.menu-button').forEach(btn => {
-            btn.classList.remove('active');
-        });
-    });
-
-    // Menu items - File
-    document.getElementById('menu-save')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        saveConfiguration();
-        // Close menu after action
-        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('open'));
-    });
-    document.getElementById('menu-load')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        loadConfiguration();
-        // Close menu after action
-        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('open'));
-    });
-
-    // Menu items - Tools
-    document.getElementById('menu-toggle')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveTool('toggle');
-        // Close menu after action
-        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('open'));
-    });
-    document.getElementById('menu-config')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveTool('config');
-        // Close menu after action
-        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('open'));
-    });
-    document.getElementById('menu-flash')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveTool('flash');
-        // Close menu after action
-        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('open'));
-    });
-    document.getElementById('menu-peripheral')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveTool('peripheral');
-        // Close menu after action
-        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('open'));
-    });
-    document.getElementById('menu-dht22')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveTool('dht22');
-        // Close menu after action
-        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('open'));
-    });
-
-    // Menu items - Apps
-    document.getElementById('menu-clock')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        toggleClock();
-        // Close menu after action
-        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('open'));
-    });
-    document.getElementById('menu-test-sequence')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        toggleTestSequence();
-        // Close menu after action
-        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('open'));
-    });
-    document.getElementById('menu-all-input')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        setAllInput();
-        // Close menu after action
-        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('open'));
-    });
-
-    // Reset button
-    document.getElementById('reset-all').addEventListener('click', resetAll);
-
-    // Layout toggle buttons
-    document.getElementById('btn-hat-mode').addEventListener('click', () => setLayout('hat'));
-    document.getElementById('btn-header-mode').addEventListener('click', () => setLayout('header'));
+    // Pin event listeners only (menus initialized separately on page load)
 
     // Add click listeners to GPIO pins
     // Use querySelectorAll to handle all pins (including clones in Hat mode)
