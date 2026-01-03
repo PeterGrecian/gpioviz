@@ -678,7 +678,9 @@ def assign_component():
         # Convert data pin from BOARD to BCM
         if 'data' in gpio_pins:
             board_pin = gpio_pins['data']
-            gpio_pins['data'] = BOARD_TO_BCM.get(board_pin, board_pin)
+            bcm_pin = BOARD_TO_BCM.get(board_pin, board_pin)
+            gpio_pins['data'] = bcm_pin
+            print(f"DHT22: Converting BOARD pin {board_pin} → BCM GPIO {bcm_pin}")
 
     # Create and assign component
     component = component_registry.create_component(component_type, name, gpio_pins, config)
