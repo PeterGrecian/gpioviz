@@ -9,6 +9,8 @@ let configToolActive = false;
 let peripheralToolActive = false;
 let clockToolActive = false;
 let dht22ToolActive = false;
+let toggleToolActive = true; // Default tool
+let currentTool = 'Toggle Output';
 let currentLayout = 'hat';
 let originalHTML = null;
 const FLASH_SPEED = 500; // Fixed flash speed in ms
@@ -22,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Set default layout to Hat mode BEFORE initializing listeners
     setLayout('hat');
+
+    // Set default tool
+    setActiveTool('toggle');
 
     loadPinStates();
     loadVersionInfo();
@@ -54,34 +59,109 @@ async function loadVersionInfo() {
     });
 }
 
+function setActiveTool(tool) {
+    // Deactivate all tools
+    toggleToolActive = false;
+    configToolActive = false;
+    flashToolActive = false;
+    peripheralToolActive = false;
+    dht22ToolActive = false;
+
+    // Remove all tool classes from body
+    document.body.classList.remove('toggle-tool-active', 'config-tool-active', 'flash-tool-active',
+                                   'peripheral-tool-active', 'dht22-tool-active');
+
+    // Remove active class from all menu items
+    document.querySelectorAll('.menu-dropdown a').forEach(item => item.classList.remove('active'));
+
+    // Activate selected tool
+    switch(tool) {
+        case 'toggle':
+            toggleToolActive = true;
+            currentTool = 'Toggle Output';
+            document.body.classList.add('toggle-tool-active');
+            document.getElementById('menu-toggle')?.classList.add('active');
+            break;
+        case 'config':
+            configToolActive = true;
+            currentTool = 'I/O Config';
+            document.body.classList.add('config-tool-active');
+            document.getElementById('menu-config')?.classList.add('active');
+            break;
+        case 'flash':
+            flashToolActive = true;
+            currentTool = 'Flash';
+            document.body.classList.add('flash-tool-active');
+            document.getElementById('menu-flash')?.classList.add('active');
+            break;
+        case 'peripheral':
+            peripheralToolActive = true;
+            currentTool = 'Peripheral';
+            document.body.classList.add('peripheral-tool-active');
+            document.getElementById('menu-peripheral')?.classList.add('active');
+            break;
+        case 'dht22':
+            dht22ToolActive = true;
+            currentTool = 'DHT22';
+            document.body.classList.add('dht22-tool-active');
+            document.getElementById('menu-dht22')?.classList.add('active');
+            break;
+    }
+
+    // Update status line
+    document.getElementById('current-tool').textContent = currentTool;
+    updateUI();
+}
+
 function initializeEventListeners() {
-    // Reset all button
+    // Menu items - File
+    document.getElementById('menu-save')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        saveConfiguration();
+    });
+    document.getElementById('menu-load')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadConfiguration();
+    });
+
+    // Menu items - Tools
+    document.getElementById('menu-toggle')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveTool('toggle');
+    });
+    document.getElementById('menu-config')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveTool('config');
+    });
+    document.getElementById('menu-flash')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveTool('flash');
+    });
+    document.getElementById('menu-peripheral')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveTool('peripheral');
+    });
+    document.getElementById('menu-dht22')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveTool('dht22');
+    });
+
+    // Menu items - Apps
+    document.getElementById('menu-clock')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleClock();
+    });
+    document.getElementById('menu-test-sequence')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleTestSequence();
+    });
+    document.getElementById('menu-all-input')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setAllInput();
+    });
+
+    // Reset button
     document.getElementById('reset-all').addEventListener('click', resetAll);
-
-    // Config tool button
-    document.getElementById('config-tool').addEventListener('click', toggleConfigTool);
-
-    // Flash tool button
-    document.getElementById('flash-tool').addEventListener('click', toggleFlashTool);
-
-    // Peripheral tool button
-    document.getElementById('peripheral-tool').addEventListener('click', togglePeripheralTool);
-
-    // DHT22 tool button
-    document.getElementById('dht22-tool').addEventListener('click', toggleDHT22Tool);
-
-    // Clock tool button
-    document.getElementById('clock-tool').addEventListener('click', toggleClock);
-
-    // Test sequence button
-    document.getElementById('test-sequence').addEventListener('click', toggleTestSequence);
-
-    // All input button
-    document.getElementById('all-input').addEventListener('click', setAllInput);
-
-    // Save/Load config buttons
-    document.getElementById('save-config').addEventListener('click', saveConfiguration);
-    document.getElementById('load-config').addEventListener('click', loadConfiguration);
 
     // Layout toggle buttons
     document.getElementById('btn-hat-mode').addEventListener('click', () => setLayout('hat'));
@@ -98,9 +178,11 @@ function initializeEventListeners() {
             // Click handler for the whole pin cell
             pinElement.addEventListener('click', (e) => {
                 // Only handle if click is on cell but not on indicator (unless mode tool active)
-                if (e.target !== indicator || peripheralToolActive || flashToolActive || configToolActive || dht22ToolActive) {
+                if (e.target !== indicator || peripheralToolActive || flashToolActive || configToolActive || dht22ToolActive || toggleToolActive) {
                     e.stopPropagation();
-                    if (peripheralToolActive) {
+                    if (toggleToolActive) {
+                        togglePinState(pin);
+                    } else if (peripheralToolActive) {
                         togglePeripheralMode(pin);
                     } else if (flashToolActive) {
                         activateFlashOnPin(pin);
@@ -116,7 +198,9 @@ function initializeEventListeners() {
             if (indicator) {
                 indicator.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (peripheralToolActive) {
+                    if (toggleToolActive) {
+                        togglePinState(pin);
+                    } else if (peripheralToolActive) {
                         togglePeripheralMode(pin);
                     } else if (flashToolActive) {
                         activateFlashOnPin(pin);
@@ -124,8 +208,6 @@ function initializeEventListeners() {
                         togglePinMode(pin);
                     } else if (dht22ToolActive) {
                         configureDHT22OnPin(pin);
-                    } else {
-                        togglePinState(pin);
                     }
                 });
             }
@@ -275,104 +357,7 @@ function showControlPanel(pin) {
     `;
 }
 
-function toggleConfigTool() {
-    configToolActive = !configToolActive;
-    const button = document.getElementById('config-tool');
-
-    // Deactivate other tools if active
-    if (configToolActive && flashToolActive) {
-        toggleFlashTool();
-    }
-    if (configToolActive && peripheralToolActive) {
-        togglePeripheralTool();
-    }
-    if (configToolActive && clockToolActive) {
-        toggleClock();
-    }
-    if (configToolActive && dht22ToolActive) {
-        toggleDHT22Tool();
-    }
-
-    if (configToolActive) {
-        button.classList.add('active');
-        document.body.classList.add('config-tool-active');
-    } else {
-        button.classList.remove('active');
-        document.body.classList.remove('config-tool-active');
-    }
-}
-
-function toggleFlashTool() {
-    flashToolActive = !flashToolActive;
-    const button = document.getElementById('flash-tool');
-
-    // Deactivate other tools if active
-    if (flashToolActive && configToolActive) {
-        toggleConfigTool();
-    }
-    if (flashToolActive && peripheralToolActive) {
-        togglePeripheralTool();
-    }
-    if (flashToolActive && clockToolActive) {
-        toggleClock();
-    }
-    if (flashToolActive && dht22ToolActive) {
-        toggleDHT22Tool();
-    }
-
-    if (flashToolActive) {
-        button.classList.add('active');
-        document.body.classList.add('flash-tool-active');
-    } else {
-        button.classList.remove('active');
-        document.body.classList.remove('flash-tool-active');
-    }
-}
-
-function togglePeripheralTool() {
-    peripheralToolActive = !peripheralToolActive;
-    const button = document.getElementById('peripheral-tool');
-
-    // Deactivate other tools if active
-    if (peripheralToolActive && flashToolActive) {
-        toggleFlashTool();
-    }
-    if (peripheralToolActive && configToolActive) {
-        toggleConfigTool();
-    }
-    if (peripheralToolActive && clockToolActive) {
-        toggleClock();
-    }
-    if (peripheralToolActive && dht22ToolActive) {
-        toggleDHT22Tool();
-    }
-
-    if (peripheralToolActive) {
-        button.classList.add('active');
-        document.body.classList.add('peripheral-tool-active');
-    } else {
-        button.classList.remove('active');
-        document.body.classList.remove('peripheral-tool-active');
-    }
-
-    // Update UI to show/hide next mode previews
-    updateUI();
-}
-
 async function toggleClock() {
-    const button = document.getElementById('clock-tool');
-
-    // Deactivate other tools if active
-    if (!clockToolActive && flashToolActive) {
-        toggleFlashTool();
-    }
-    if (!clockToolActive && configToolActive) {
-        toggleConfigTool();
-    }
-    if (!clockToolActive && peripheralToolActive) {
-        togglePeripheralTool();
-    }
-
     try {
         const response = await fetch('/api/clock/toggle', {
             method: 'POST',
@@ -384,46 +369,10 @@ async function toggleClock() {
         const data = await response.json();
         if (data.success) {
             clockToolActive = data.clock_running;
-
-            if (clockToolActive) {
-                button.classList.add('active');
-                button.textContent = '🕐 Stop Clock';
-            } else {
-                button.classList.remove('active');
-                button.textContent = '🕐 Clock';
-            }
-
             await loadPinStates();
         }
     } catch (error) {
         console.error('Error toggling clock:', error);
-    }
-}
-
-function toggleDHT22Tool() {
-    dht22ToolActive = !dht22ToolActive;
-    const button = document.getElementById('dht22-tool');
-
-    // Deactivate other tools if active
-    if (dht22ToolActive && flashToolActive) {
-        toggleFlashTool();
-    }
-    if (dht22ToolActive && configToolActive) {
-        toggleConfigTool();
-    }
-    if (dht22ToolActive && peripheralToolActive) {
-        togglePeripheralTool();
-    }
-    if (dht22ToolActive && clockToolActive) {
-        toggleClock();
-    }
-
-    if (dht22ToolActive) {
-        button.classList.add('active');
-        document.body.classList.add('dht22-tool-active');
-    } else {
-        button.classList.remove('active');
-        document.body.classList.remove('dht22-tool-active');
     }
 }
 
@@ -449,10 +398,10 @@ async function configureDHT22OnPin(pin) {
         if (data.success) {
             dht22Pin = pin;
             await loadPinStates();
-            // Deactivate tool after configuring
-            toggleDHT22Tool();
             // Start polling for DHT22 data
             startDHT22Polling(pin);
+            // Switch back to toggle tool
+            setActiveTool('toggle');
         } else {
             alert(`Error: ${data.error}`);
         }

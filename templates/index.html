@@ -19,6 +19,41 @@
             <span id="device-type"></span>
         </div>
 
+        <!-- Menu Bar -->
+        <div class="menu-bar">
+            <div class="menu-item">
+                <button class="menu-button">File</button>
+                <div class="menu-dropdown">
+                    <a href="#" id="menu-save">💾 Save Configuration</a>
+                    <a href="#" id="menu-load">📂 Load Configuration</a>
+                </div>
+            </div>
+            <div class="menu-item">
+                <button class="menu-button">Tools</button>
+                <div class="menu-dropdown">
+                    <a href="#" id="menu-toggle" class="active">🖱 Toggle Output</a>
+                    <a href="#" id="menu-config">■ I/O Config</a>
+                    <a href="#" id="menu-flash">⚡ Flash</a>
+                    <a href="#" id="menu-peripheral">🔧 Peripheral</a>
+                    <a href="#" id="menu-dht22">🌡 DHT22</a>
+                </div>
+            </div>
+            <div class="menu-item">
+                <button class="menu-button">Apps</button>
+                <div class="menu-dropdown">
+                    <a href="#" id="menu-clock">🕐 Clock</a>
+                    <a href="#" id="menu-test-sequence">▶ Test Sequence</a>
+                    <a href="#" id="menu-all-input">◀ All Input</a>
+                </div>
+            </div>
+            <button id="reset-all" class="btn btn-danger reset-button">Reset</button>
+        </div>
+
+        <!-- Status Line -->
+        <div class="status-line">
+            Tool: <span id="current-tool">Toggle Output</span>
+        </div>
+
         <div class="main-content">
         <div class="gpio-board">
             <div class="layout-toggle">
@@ -290,18 +325,6 @@
             </div>
         </div>
 
-        <div class="control-buttons">
-            <button id="config-tool" class="btn btn-config-tool">■ I/O Config</button>
-            <button id="flash-tool" class="btn btn-flash-tool">⚡ Flash</button>
-            <button id="peripheral-tool" class="btn btn-peripheral-tool">☠ Peripheral</button>
-            <button id="dht22-tool" class="btn btn-success">🌡 DHT22</button>
-            <button id="clock-tool" class="btn btn-primary">🕐 Clock</button>
-            <button id="test-sequence" class="btn btn-primary">▶ Test Sequence</button>
-            <button id="all-input" class="btn btn-success">◀ All Input</button>
-            <button id="save-config" class="btn btn-primary">💾 Save</button>
-            <button id="load-config" class="btn btn-success">📂 Load</button>
-            <button id="reset-all" class="btn btn-danger">Reset</button>
-        </div>
 
         </div>
 
