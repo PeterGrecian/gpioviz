@@ -8,6 +8,7 @@ let flashToolActive = false;
 let configToolActive = false;
 let peripheralToolActive = false;
 let clockToolActive = false;
+let dht22ToolActive = false;
 let currentLayout = 'hat';
 let originalHTML = null;
 const FLASH_SPEED = 500; // Fixed flash speed in ms
@@ -66,6 +67,9 @@ function initializeEventListeners() {
     // Peripheral tool button
     document.getElementById('peripheral-tool').addEventListener('click', togglePeripheralTool);
 
+    // DHT22 tool button
+    document.getElementById('dht22-tool').addEventListener('click', toggleDHT22Tool);
+
     // Clock tool button
     document.getElementById('clock-tool').addEventListener('click', toggleClock);
 
@@ -94,7 +98,7 @@ function initializeEventListeners() {
             // Click handler for the whole pin cell
             pinElement.addEventListener('click', (e) => {
                 // Only handle if click is on cell but not on indicator (unless mode tool active)
-                if (e.target !== indicator || peripheralToolActive || flashToolActive || configToolActive) {
+                if (e.target !== indicator || peripheralToolActive || flashToolActive || configToolActive || dht22ToolActive) {
                     e.stopPropagation();
                     if (peripheralToolActive) {
                         togglePeripheralMode(pin);
@@ -102,6 +106,8 @@ function initializeEventListeners() {
                         activateFlashOnPin(pin);
                     } else if (configToolActive) {
                         togglePinMode(pin);
+                    } else if (dht22ToolActive) {
+                        configureDHT22OnPin(pin);
                     }
                 }
             });
@@ -116,6 +122,8 @@ function initializeEventListeners() {
                         activateFlashOnPin(pin);
                     } else if (configToolActive) {
                         togglePinMode(pin);
+                    } else if (dht22ToolActive) {
+                        configureDHT22OnPin(pin);
                     } else {
                         togglePinState(pin);
                     }
@@ -281,6 +289,9 @@ function toggleConfigTool() {
     if (configToolActive && clockToolActive) {
         toggleClock();
     }
+    if (configToolActive && dht22ToolActive) {
+        toggleDHT22Tool();
+    }
 
     if (configToolActive) {
         button.classList.add('active');
@@ -305,6 +316,9 @@ function toggleFlashTool() {
     if (flashToolActive && clockToolActive) {
         toggleClock();
     }
+    if (flashToolActive && dht22ToolActive) {
+        toggleDHT22Tool();
+    }
 
     if (flashToolActive) {
         button.classList.add('active');
@@ -328,6 +342,9 @@ function togglePeripheralTool() {
     }
     if (peripheralToolActive && clockToolActive) {
         toggleClock();
+    }
+    if (peripheralToolActive && dht22ToolActive) {
+        toggleDHT22Tool();
     }
 
     if (peripheralToolActive) {
@@ -380,6 +397,102 @@ async function toggleClock() {
         }
     } catch (error) {
         console.error('Error toggling clock:', error);
+    }
+}
+
+function toggleDHT22Tool() {
+    dht22ToolActive = !dht22ToolActive;
+    const button = document.getElementById('dht22-tool');
+
+    // Deactivate other tools if active
+    if (dht22ToolActive && flashToolActive) {
+        toggleFlashTool();
+    }
+    if (dht22ToolActive && configToolActive) {
+        toggleConfigTool();
+    }
+    if (dht22ToolActive && peripheralToolActive) {
+        togglePeripheralTool();
+    }
+    if (dht22ToolActive && clockToolActive) {
+        toggleClock();
+    }
+
+    if (dht22ToolActive) {
+        button.classList.add('active');
+        document.body.classList.add('dht22-tool-active');
+    } else {
+        button.classList.remove('active');
+        document.body.classList.remove('dht22-tool-active');
+    }
+}
+
+async function configureDHT22OnPin(pin) {
+    try {
+        const response = await fetch('/api/dht22/configure', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ pin: pin })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            await loadPinStates();
+            // Deactivate tool after configuring
+            toggleDHT22Tool();
+            // Start polling for DHT22 data
+            startDHT22Polling();
+        } else {
+            alert(`Error: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error configuring DHT22:', error);
+        alert('Error configuring DHT22 sensor');
+    }
+}
+
+let dht22PollInterval = null;
+
+function startDHT22Polling() {
+    // Show the DHT22 panel
+    document.getElementById('dht22-readings').style.display = 'block';
+
+    // Clear any existing interval
+    if (dht22PollInterval) {
+        clearInterval(dht22PollInterval);
+    }
+
+    // Poll every 2 seconds
+    dht22PollInterval = setInterval(updateDHT22Display, 2000);
+    // Update immediately
+    updateDHT22Display();
+}
+
+async function updateDHT22Display() {
+    try {
+        const response = await fetch('/api/dht22/data');
+        const data = await response.json();
+
+        if (data.success && data.running) {
+            document.getElementById('dht22-pin').textContent = data.pin || '--';
+            document.getElementById('dht22-temp').textContent =
+                data.data.temperature !== null ? data.data.temperature : '--';
+            document.getElementById('dht22-humidity').textContent =
+                data.data.humidity !== null ? data.data.humidity : '--';
+            document.getElementById('dht22-updated').textContent =
+                data.data.last_updated || '--';
+        } else {
+            // Stop polling if DHT22 is not running
+            if (dht22PollInterval) {
+                clearInterval(dht22PollInterval);
+                dht22PollInterval = null;
+            }
+            document.getElementById('dht22-readings').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error fetching DHT22 data:', error);
     }
 }
 

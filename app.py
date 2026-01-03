@@ -9,6 +9,14 @@ import yaml
 import os
 import argparse
 
+# Try to import Adafruit_DHT for DHT22 sensor support
+try:
+    import Adafruit_DHT
+    DHT22_AVAILABLE = True
+except ImportError:
+    DHT22_AVAILABLE = False
+    print("Warning: Adafruit_DHT not available. DHT22 sensor support disabled.")
+
 # Check if running as root
 def is_root():
     """Check if the process is running as root"""
@@ -32,6 +40,16 @@ flash_threads = {}
 # Clock state
 clock_running = False
 clock_thread = None
+
+# DHT22 sensor state
+dht22_pin = None
+dht22_running = False
+dht22_thread = None
+dht22_data = {
+    'temperature': None,
+    'humidity': None,
+    'last_updated': None
+}
 
 # HAT mode clock display using left 3 columns for tens, right 3 columns for ones
 # Creates digit patterns in 4x3 grids to display seconds
@@ -149,6 +167,37 @@ def clock_display_thread():
 
         # Update every second
         time.sleep(1)
+
+def dht22_read_thread():
+    """Thread function to periodically read DHT22 sensor data"""
+    global dht22_running, dht22_data, dht22_pin
+
+    while dht22_running:
+        if dht22_pin and DHT22_AVAILABLE:
+            try:
+                # Read from DHT22 sensor (using GPIO BCM numbering)
+                # Convert board pin to BCM GPIO number
+                gpio_bcm = None
+                for board_pin, gpio_name in GPIO_PINS.items():
+                    if board_pin == dht22_pin:
+                        # Extract BCM GPIO number from name like "GPIO17"
+                        gpio_bcm = int(gpio_name.split('(')[0].replace('GPIO', '').strip())
+                        break
+
+                if gpio_bcm is not None:
+                    humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, gpio_bcm)
+
+                    if humidity is not None and temperature is not None:
+                        dht22_data['temperature'] = round(temperature, 1)
+                        dht22_data['humidity'] = round(humidity, 1)
+                        dht22_data['last_updated'] = datetime.now().strftime('%H:%M:%S')
+                    else:
+                        print(f"Failed to read DHT22 on pin {dht22_pin} (GPIO{gpio_bcm})")
+            except Exception as e:
+                print(f"Error reading DHT22: {e}")
+
+        # Update every 2 seconds (DHT22 has ~2 second response time)
+        time.sleep(2)
 
 # Stats tracking
 start_time = datetime.now()
@@ -578,6 +627,81 @@ def toggle_clock():
 
         return jsonify({'success': True, 'clock_running': True})
 
+@app.route('/api/dht22/configure', methods=['POST'])
+def configure_dht22():
+    """Configure a pin as DHT22 sensor"""
+    global dht22_pin, dht22_running, dht22_thread, dht22_data, pin_changes
+
+    if not DHT22_AVAILABLE:
+        return jsonify({'success': False, 'error': 'Adafruit_DHT library not available'}), 500
+
+    data = request.json
+    pin = data.get('pin')
+
+    if pin not in GPIO_PINS:
+        return jsonify({'error': 'Invalid pin'}), 400
+
+    # Stop any existing DHT22 reading
+    if dht22_running:
+        dht22_running = False
+        if dht22_thread:
+            dht22_thread.join()
+            dht22_thread = None
+
+    # Stop any flashing on this pin
+    if pin_states[pin].get('flashing', False):
+        flashing_pins[pin] = False
+        if pin in flash_threads:
+            flash_threads[pin].join()
+        pin_states[pin]['flashing'] = False
+
+    # Configure pin for DHT22 (input mode)
+    dht22_pin = pin
+    pin_states[pin]['mode'] = 'DHT22'
+    pin_states[pin]['dht22'] = True
+    pin_changes += 1
+
+    # Start reading thread
+    dht22_running = True
+    dht22_thread = threading.Thread(target=dht22_read_thread)
+    dht22_thread.daemon = True
+    dht22_thread.start()
+
+    return jsonify({
+        'success': True,
+        'pin': pin,
+        'mode': 'DHT22'
+    })
+
+@app.route('/api/dht22/data', methods=['GET'])
+def get_dht22_data():
+    """Get current DHT22 sensor readings"""
+    return jsonify({
+        'success': True,
+        'pin': dht22_pin,
+        'running': dht22_running,
+        'data': dht22_data
+    })
+
+@app.route('/api/dht22/stop', methods=['POST'])
+def stop_dht22():
+    """Stop DHT22 sensor reading"""
+    global dht22_running, dht22_pin, pin_changes
+
+    if dht22_running:
+        dht22_running = False
+        if dht22_thread:
+            dht22_thread.join()
+
+        # Reset pin to normal input mode
+        if dht22_pin:
+            pin_states[dht22_pin]['mode'] = 'IN'
+            pin_states[dht22_pin]['dht22'] = False
+            dht22_pin = None
+            pin_changes += 1
+
+    return jsonify({'success': True, 'running': False})
+
 def save_configuration(filename='config.yaml'):
     """Save current pin configuration to YAML file"""
     config = {
@@ -641,13 +765,19 @@ def load_configuration(filename='config.yaml'):
 
 def cleanup():
     """Cleanup GPIO on exit"""
-    global clock_running
+    global clock_running, dht22_running
 
     # Stop clock if running
     if clock_running:
         clock_running = False
         if clock_thread:
             clock_thread.join()
+
+    # Stop DHT22 if running
+    if dht22_running:
+        dht22_running = False
+        if dht22_thread:
+            dht22_thread.join()
 
     # Stop all flashing
     for pin in flashing_pins.keys():
