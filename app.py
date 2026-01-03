@@ -226,6 +226,15 @@ GPIO_PINS = {
     40: 'GPIO21'
 }
 
+# BOARD (physical pin) to BCM GPIO number mapping
+# Some libraries like Adafruit_DHT only use BCM numbering
+BOARD_TO_BCM = {
+    3: 2, 5: 3, 7: 4, 8: 14, 10: 15, 11: 17, 12: 18, 13: 27,
+    15: 22, 16: 23, 18: 24, 19: 10, 21: 9, 22: 25, 23: 11, 24: 8,
+    26: 7, 29: 5, 31: 6, 32: 12, 33: 13, 35: 19, 36: 16, 37: 26,
+    38: 20, 40: 21
+}
+
 # Pin alternative functions mapping
 PIN_ALT_FUNCTIONS = {
     3: ['I2C1 SDA', 'GPIO'],
@@ -658,6 +667,14 @@ def assign_component():
         GPIO.cleanup(pin)
     except:
         pass  # Ignore if pin wasn't set up
+
+    # Convert BOARD pin numbers to BCM for components that require BCM numbering
+    # (e.g., Adafruit_DHT library only uses BCM)
+    if component_type == 'dht22':
+        # Convert data pin from BOARD to BCM
+        if 'data' in gpio_pins:
+            board_pin = gpio_pins['data']
+            gpio_pins['data'] = BOARD_TO_BCM.get(board_pin, board_pin)
 
     # Create and assign component
     component = component_registry.create_component(component_type, name, gpio_pins, config)
