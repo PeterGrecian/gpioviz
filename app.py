@@ -168,6 +168,10 @@ def component_read_thread(pin):
     """Thread function to periodically read component data"""
     global component_running, component_data
 
+    # Initial delay to let sensor stabilize after GPIO setup
+    # Critical for sensors like DHT22 that need time after pin state changes
+    time.sleep(2)
+
     while component_running.get(pin, False):
         component = component_registry.get_component(pin)
         if component:
