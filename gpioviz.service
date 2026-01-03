@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=peter
 WorkingDirectory=/home/peter/gpioviz
-ExecStart=/usr/bin/python3 /home/peter/gpioviz/app.py
+ExecStart=/home/peter/gpioviz/venv/bin/python /home/peter/gpioviz/app.py
 Restart=always
 RestartSec=10
 
