@@ -135,28 +135,28 @@ def clock_display_thread():
         tens_digit = seconds // 10
         ones_digit = seconds % 10
 
-        # Turn off all clock pins first
+        # Turn off all clock pins first (skip pins with components)
         all_clock_pins = get_all_clock_pins()
         for pin in all_clock_pins:
-            if pin in GPIO_PINS:
+            if pin in GPIO_PINS and not pin_states[pin].get('component', False):
                 ensure_pin_setup(pin, 'OUT')
                 GPIO.output(pin, GPIO.LOW)
                 pin_states[pin]['state'] = 0
 
-        # Display tens digit on left 3 columns
+        # Display tens digit on left 3 columns (skip pins with components)
         tens_gpio_pattern = TENS_PATTERNS_GPIO.get(tens_digit, [])
         for gpio_num in tens_gpio_pattern:
             pin = TENS_GPIO_TO_PIN.get(gpio_num)
-            if pin and pin in GPIO_PINS:
+            if pin and pin in GPIO_PINS and not pin_states[pin].get('component', False):
                 ensure_pin_setup(pin, 'OUT')
                 GPIO.output(pin, GPIO.HIGH)
                 pin_states[pin]['state'] = 1
 
-        # Display ones digit on right 3 columns
+        # Display ones digit on right 3 columns (skip pins with components)
         ones_gpio_pattern = ONES_PATTERNS_GPIO.get(ones_digit, [])
         for gpio_num in ones_gpio_pattern:
             pin = ONES_GPIO_TO_PIN.get(gpio_num)
-            if pin and pin in GPIO_PINS:
+            if pin and pin in GPIO_PINS and not pin_states[pin].get('component', False):
                 ensure_pin_setup(pin, 'OUT')
                 GPIO.output(pin, GPIO.HIGH)
                 pin_states[pin]['state'] = 1
