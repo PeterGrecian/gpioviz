@@ -214,6 +214,7 @@ function updateToolInfo(tool) {
             title: '🌡 DHT22 Sensor Tool',
             content: `
                 <p><strong>Click any GPIO pin</strong> to assign a DHT22 temperature/humidity sensor.</p>
+                <p><strong>Click again</strong> on an assigned pin to remove the sensor.</p>
                 <p><strong>Wiring:</strong></p>
                 <ul>
                     <li>VCC → 3.3V or 5V power pin</li>
@@ -517,6 +518,34 @@ let dht22Pin = null; // Track which pin has the DHT22 component
 
 async function configureDHT22OnPin(pin) {
     try {
+        // Check if this pin already has DHT22 - if so, remove it
+        const state = pinStates[pin];
+        if (state && state.component) {
+            // Remove the component
+            const removeResponse = await fetch(`/api/component/${pin}/remove`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const removeData = await removeResponse.json();
+            if (removeData.success) {
+                dht22Pin = null;
+                if (dht22PollInterval) {
+                    clearInterval(dht22PollInterval);
+                    dht22PollInterval = null;
+                }
+                document.getElementById('dht22-readings').style.display = 'none';
+                document.getElementById('sensor-readings').style.display = 'none';
+                await loadPinStates();
+            } else {
+                alert(`Error removing component: ${removeData.error}`);
+            }
+            return;
+        }
+
+        // Assign new DHT22 component
         const response = await fetch('/api/component/assign', {
             method: 'POST',
             headers: {
@@ -537,8 +566,7 @@ async function configureDHT22OnPin(pin) {
             await loadPinStates();
             // Start polling for DHT22 data
             startDHT22Polling(pin);
-            // Switch back to toggle tool
-            setActiveTool('toggle');
+            // Stay in DHT22 tool mode (don't auto-switch back)
         } else {
             alert(`Error: ${data.error}`);
         }
