@@ -738,6 +738,12 @@ header h1 {
     font-weight: 700;
 }
 
+#sensor-readings {
+    color: #2e7d32;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
 /* Tool Cursors - apply to entire GPIO board with custom icons */
 body.toggle-tool-active .gpio-board,
 body.toggle-tool-active .gpio-board * {

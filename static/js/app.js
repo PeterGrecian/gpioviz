@@ -570,13 +570,24 @@ async function updateDHT22Display(pin) {
 
         if (data.success && data.running) {
             const componentData = data.data.data || {};
+            const temp = componentData.temperature !== undefined ? componentData.temperature : '--';
+            const humidity = componentData.humidity !== undefined ? componentData.humidity : '--';
+
+            // Update panel
             document.getElementById('dht22-pin').textContent = pin || '--';
-            document.getElementById('dht22-temp').textContent =
-                componentData.temperature !== undefined ? componentData.temperature : '--';
-            document.getElementById('dht22-humidity').textContent =
-                componentData.humidity !== undefined ? componentData.humidity : '--';
+            document.getElementById('dht22-temp').textContent = temp;
+            document.getElementById('dht22-humidity').textContent = humidity;
             document.getElementById('dht22-updated').textContent =
                 data.data.last_updated || '--';
+
+            // Update status line
+            const sensorReadings = document.getElementById('sensor-readings');
+            if (temp !== '--' && humidity !== '--') {
+                sensorReadings.innerHTML = ` | 🌡 ${temp}°C 💧 ${humidity}%`;
+                sensorReadings.style.display = 'inline';
+            } else {
+                sensorReadings.style.display = 'none';
+            }
         } else {
             // Stop polling if component is not running
             if (dht22PollInterval) {
@@ -584,6 +595,7 @@ async function updateDHT22Display(pin) {
                 dht22PollInterval = null;
             }
             document.getElementById('dht22-readings').style.display = 'none';
+            document.getElementById('sensor-readings').style.display = 'none';
         }
     } catch (error) {
         console.error('Error fetching component data:', error);
