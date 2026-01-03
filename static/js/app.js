@@ -903,19 +903,28 @@ async function setAllInput() {
 }
 
 async function resetAll() {
-    if (confirm('Reset all pins to LOW output?')) {
-        try {
-            const response = await fetch('/api/reset', {
-                method: 'POST'
-            });
+    try {
+        // Execute reset immediately
+        const response = await fetch('/api/reset', {
+            method: 'POST'
+        });
 
-            const data = await response.json();
-            if (data.success) {
-                await loadPinStates();
-            }
-        } catch (error) {
-            console.error('Error resetting pins:', error);
+        const data = await response.json();
+        if (data.success) {
+            await loadPinStates();
+
+            // Flash acknowledgement in status line
+            const statusLine = document.querySelector('.status-line');
+            const originalBg = statusLine.style.backgroundColor;
+            statusLine.style.backgroundColor = '#4caf50';
+            statusLine.style.transition = 'background-color 0.3s';
+
+            setTimeout(() => {
+                statusLine.style.backgroundColor = originalBg;
+            }, 500);
         }
+    } catch (error) {
+        console.error('Error resetting pins:', error);
     }
 }
 
