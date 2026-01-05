@@ -38,7 +38,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // For outputs: shows the commanded state (what we wrote)
     // For inputs: shows actual GPIO voltage reading
     setInterval(updatePinStates, 500);
+
+    // Modal event handlers
+    setupModalHandlers();
 });
+
+function setupModalHandlers() {
+    // Close modals when clicking outside
+    document.getElementById('save-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'save-modal') {
+            closeSaveModal();
+        }
+    });
+
+    document.getElementById('load-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'load-modal') {
+            closeLoadModal();
+        }
+    });
+
+    // Handle Enter key on save input
+    document.getElementById('save-filename').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            confirmSave();
+        }
+    });
+
+    // Handle Escape key to close modals
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeSaveModal();
+            closeLoadModal();
+        }
+    });
+}
 
 function initializeMenuListeners() {
     // Menu system - click-based dropdowns
@@ -966,11 +999,54 @@ async function resetAll() {
 }
 
 async function saveConfiguration() {
-    const filename = prompt('Enter configuration filename:', 'config.yaml');
-    if (!filename) return;
+    try {
+        // Get list of existing configurations
+        const listResponse = await fetch('/api/config/list');
+        const listData = await listResponse.json();
+
+        // Populate existing configs list
+        const existingList = document.getElementById('existing-configs-list');
+        if (listData.configs.length === 0) {
+            existingList.innerHTML = '<div class="config-list-item empty">No existing configurations</div>';
+        } else {
+            existingList.innerHTML = listData.configs.map(config =>
+                `<div class="config-list-item" onclick="document.getElementById('save-filename').value='${config}'">${config}</div>`
+            ).join('');
+        }
+
+        // Clear and focus input
+        const input = document.getElementById('save-filename');
+        input.value = 'config.yaml';
+
+        // Show modal
+        document.getElementById('save-modal').classList.add('show');
+
+        // Focus input after animation
+        setTimeout(() => input.focus(), 100);
+    } catch (error) {
+        console.error('Error opening save dialog:', error);
+        alert('Error opening save dialog');
+    }
+}
+
+function closeSaveModal() {
+    document.getElementById('save-modal').classList.remove('show');
+}
+
+async function confirmSave() {
+    const input = document.getElementById('save-filename');
+    let filename = input.value.trim();
+
+    if (!filename) {
+        alert('Please enter a filename');
+        input.focus();
+        return;
+    }
 
     // Ensure .yaml extension
-    const finalFilename = filename.endsWith('.yaml') || filename.endsWith('.yml') ? filename : filename + '.yaml';
+    if (!filename.endsWith('.yaml') && !filename.endsWith('.yml')) {
+        filename = filename + '.yaml';
+    }
 
     try {
         const response = await fetch('/api/config/save', {
@@ -978,11 +1054,12 @@ async function saveConfiguration() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ filename: finalFilename })
+            body: JSON.stringify({ filename: filename })
         });
 
         const data = await response.json();
         if (data.success) {
+            closeSaveModal();
             alert(`Configuration saved to ${data.filepath}`);
         } else {
             alert(`Error saving configuration: ${data.error}`);
@@ -999,15 +1076,30 @@ async function loadConfiguration() {
         const listResponse = await fetch('/api/config/list');
         const listData = await listResponse.json();
 
+        const configsList = document.getElementById('load-configs-list');
+
         if (listData.configs.length === 0) {
-            alert('No saved configurations found');
-            return;
+            configsList.innerHTML = '<div class="config-list-item empty">No saved configurations found</div>';
+        } else {
+            configsList.innerHTML = listData.configs.map(config =>
+                `<div class="config-list-item" onclick="loadConfigFile('${config}')">${config}</div>`
+            ).join('');
         }
 
-        const configList = listData.configs.join('\n');
-        const filename = prompt(`Available configurations:\n${configList}\n\nEnter filename to load:`, listData.configs[0] || 'config.yaml');
-        if (!filename) return;
+        // Show modal
+        document.getElementById('load-modal').classList.add('show');
+    } catch (error) {
+        console.error('Error loading configuration list:', error);
+        alert('Error loading configuration list');
+    }
+}
 
+function closeLoadModal() {
+    document.getElementById('load-modal').classList.remove('show');
+}
+
+async function loadConfigFile(filename) {
+    try {
         const response = await fetch('/api/config/load', {
             method: 'POST',
             headers: {
@@ -1018,6 +1110,7 @@ async function loadConfiguration() {
 
         const data = await response.json();
         if (data.success) {
+            closeLoadModal();
             await loadPinStates();
             alert(`Configuration loaded from ${filename}`);
         } else {

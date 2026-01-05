@@ -351,6 +351,45 @@
         </div>
     </div>
 
+    <!-- Save Configuration Modal -->
+    <div id="save-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Save Configuration</h2>
+                <button class="modal-close" onclick="closeSaveModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <label for="save-filename">Filename:</label>
+                <input type="text" id="save-filename" placeholder="my-config.yaml" />
+                <div id="existing-configs" class="config-list">
+                    <p class="list-header">Existing configurations:</p>
+                    <div id="existing-configs-list"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="closeSaveModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmSave()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Configuration Modal -->
+    <div id="load-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Load Configuration</h2>
+                <button class="modal-close" onclick="closeLoadModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-instruction">Select a configuration to load:</p>
+                <div id="load-configs-list" class="config-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="closeLoadModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/js/app.js"></script>
 </body>
 </html>
