@@ -11,7 +11,7 @@ import argparse
 
 # Import component system
 from components import ComponentRegistry
-from components.producers import DHT22Component
+from components.producers import DHT22Component, DHT11Component
 
 # Check if running as root
 def is_root():
@@ -41,6 +41,7 @@ clock_thread = None
 component_registry = ComponentRegistry(definitions_file='components/definitions.json')
 # Register available component classes
 component_registry.register_class('dht22', DHT22Component)
+component_registry.register_class('dht11', DHT11Component)
 
 # Component reading state
 component_threads = {}  # pin -> thread
@@ -684,10 +685,10 @@ def assign_component():
             flash_threads[pin].join()
         pin_states[pin]['flashing'] = False
 
-    # Clean up GPIO only if NOT a DHT22 component
-    # DHT22 uses Adafruit_DHT which does its own low-level GPIO access
+    # Clean up GPIO only if NOT a DHT sensor component
+    # DHT sensors use Adafruit_DHT which does its own low-level GPIO access
     # and doesn't need (or want) RPi.GPIO to touch the pin
-    if component_type != 'dht22':
+    if component_type not in ['dht22', 'dht11']:
         try:
             GPIO.cleanup(pin)
             # Re-establish GPIO mode after cleanup
@@ -697,13 +698,13 @@ def assign_component():
 
     # Convert BOARD pin numbers to BCM for components that require BCM numbering
     # (e.g., Adafruit_DHT library only uses BCM)
-    if component_type == 'dht22':
+    if component_type in ['dht22', 'dht11']:
         # Convert data pin from BOARD to BCM
         if 'data' in gpio_pins:
             board_pin = gpio_pins['data']
             bcm_pin = BOARD_TO_BCM.get(board_pin, board_pin)
             gpio_pins['data'] = bcm_pin
-            print(f"DHT22: Converting BOARD pin {board_pin} → BCM GPIO {bcm_pin}")
+            print(f"{component_type.upper()}: Converting BOARD pin {board_pin} → BCM GPIO {bcm_pin}")
 
     # Create and assign component
     component = component_registry.create_component(component_type, name, gpio_pins, config)
@@ -867,13 +868,13 @@ def load_configuration(filename='config.yaml'):
             gpio_pins = comp_info.get('gpio_pins', {'data': pin})
             comp_config = comp_info.get('config', {})
 
-            # Convert data pin from BOARD to BCM for DHT22
-            if component_type == 'dht22':
+            # Convert data pin from BOARD to BCM for DHT sensors
+            if component_type in ['dht22', 'dht11']:
                 if 'data' in gpio_pins:
                     board_pin = gpio_pins['data']
                     bcm_pin = BOARD_TO_BCM.get(board_pin, board_pin)
                     gpio_pins['data'] = bcm_pin
-                    print(f"DHT22: Converting BOARD pin {board_pin} → BCM GPIO {bcm_pin}")
+                    print(f"{component_type.upper()}: Converting BOARD pin {board_pin} → BCM GPIO {bcm_pin}")
 
             # Create and assign component
             component = component_registry.create_component(component_type, name, gpio_pins, comp_config)

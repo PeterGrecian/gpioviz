@@ -837,6 +837,53 @@ body.dht22-tool-active .gpio-board * {
     }
 }
 
+/* DHT11 Cursor */
+body.dht11-tool-active,
+body.dht11-tool-active *,
+body.dht11-tool-active .main-content,
+body.dht11-tool-active .gpio-board,
+body.dht11-tool-active .gpio-board * {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="%2327ae60" stroke="%2316a085" stroke-width="2"/><text x="16" y="22" font-size="14" font-weight="bold" fill="white" text-anchor="middle">11</text></svg>') 16 16, pointer !important;
+}
+
+/* DHT11 Component indicators on pins */
+.pin-indicator.has-dht11::after {
+    content: '11';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    font-weight: bold;
+    color: #27ae60;
+    pointer-events: none;
+    z-index: 10;
+    line-height: 1;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.8), 0 0 4px rgba(255, 255, 255, 0.5);
+    opacity: 1;
+}
+
+/* Change background when DHT11 assigned for better visibility */
+.pin-indicator.has-dht11 {
+    background: #34495e !important;
+    border-color: #27ae60 !important;
+    border-width: 3px !important;
+}
+
+/* Make icon visible in HAT mode */
+.pin-row-hat .pin-indicator.has-dht11::after,
+.layout-hat .pin-indicator.has-dht11::after {
+    font-size: 9px !important;
+}
+
+/* Slightly smaller on mobile HAT mode */
+@media (max-width: 768px) {
+    .pin-row-hat .pin-indicator.has-dht11::after,
+    .layout-hat .pin-indicator.has-dht11::after {
+        font-size: 8px !important;
+    }
+}
+
 /* Modal Styles */
 .modal {
     display: none;

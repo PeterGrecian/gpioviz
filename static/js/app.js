@@ -9,6 +9,7 @@ let configToolActive = false;
 let peripheralToolActive = false;
 let clockToolActive = false;
 let dht22ToolActive = false;
+let dht11ToolActive = false;
 let toggleToolActive = true; // Default tool
 let currentTool = 'Toggle Output';
 let currentLayout = 'hat';
@@ -146,6 +147,12 @@ function initializeMenuListeners() {
         closeAllMenus();
     });
 
+    document.getElementById('menu-dht11')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveTool('dht11');
+        closeAllMenus();
+    });
+
     // Menu items - Apps
     document.getElementById('menu-clock')?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -257,6 +264,21 @@ function updateToolInfo(tool) {
                 <p><strong>Readings:</strong> Temperature (°C) and Humidity (%) update every 2 seconds.</p>
                 <p><strong>Requirements:</strong> Adafruit_DHT library (installed via requirements.txt)</p>
             `
+        },
+        'dht11': {
+            title: '🌡 DHT11 Sensor Tool',
+            content: `
+                <p><strong>Click any GPIO pin</strong> to assign a DHT11 temperature/humidity sensor.</p>
+                <p><strong>Click again</strong> on an assigned pin to remove the sensor.</p>
+                <p><strong>Wiring:</strong></p>
+                <ul>
+                    <li>VCC → 3.3V or 5V power pin</li>
+                    <li>DATA → Selected GPIO pin (with 4.7kΩ-10kΩ pull-up resistor to VCC)</li>
+                    <li>GND → Ground pin</li>
+                </ul>
+                <p><strong>Specs:</strong> 0-50°C (±2°C), 20-80% RH (±5%)</p>
+                <p><strong>Requirements:</strong> Adafruit_DHT library (installed via requirements.txt)</p>
+            `
         }
     };
 
@@ -273,10 +295,11 @@ function setActiveTool(tool) {
     flashToolActive = false;
     peripheralToolActive = false;
     dht22ToolActive = false;
+    dht11ToolActive = false;
 
     // Remove all tool classes from body
     document.body.classList.remove('toggle-tool-active', 'config-tool-active', 'flash-tool-active',
-                                   'peripheral-tool-active', 'dht22-tool-active');
+                                   'peripheral-tool-active', 'dht22-tool-active', 'dht11-tool-active');
 
     // Remove active class from all menu items
     document.querySelectorAll('.menu-dropdown a').forEach(item => item.classList.remove('active'));
@@ -312,6 +335,12 @@ function setActiveTool(tool) {
             currentTool = 'DHT22';
             document.body.classList.add('dht22-tool-active');
             document.getElementById('menu-dht22')?.classList.add('active');
+            break;
+        case 'dht11':
+            dht11ToolActive = true;
+            currentTool = 'DHT11';
+            document.body.classList.add('dht11-tool-active');
+            document.getElementById('menu-dht11')?.classList.add('active');
             break;
     }
 
@@ -350,6 +379,8 @@ function initializeEventListeners() {
                         togglePinMode(pin);
                     } else if (dht22ToolActive) {
                         configureDHT22OnPin(pin);
+                    } else if (dht11ToolActive) {
+                        configureDHT11OnPin(pin);
                     }
                 }
             });
@@ -368,6 +399,8 @@ function initializeEventListeners() {
                         togglePinMode(pin);
                     } else if (dht22ToolActive) {
                         configureDHT22OnPin(pin);
+                    } else if (dht11ToolActive) {
+                        configureDHT11OnPin(pin);
                     }
                 });
             }
@@ -429,11 +462,13 @@ function updateUI() {
                 // Check for component assignments
                 if (indicator) {
                     // Remove all component classes first
-                    indicator.classList.remove('has-dht22');
+                    indicator.classList.remove('has-dht22', 'has-dht11');
 
                     // Add component-specific class based on mode
-                    if (state.mode === 'DHT22' || state.component) {
+                    if (state.mode === 'DHT22' || (state.component && state.mode === 'DHT22')) {
                         indicator.classList.add('has-dht22');
+                    } else if (state.mode === 'DHT11' || (state.component && state.mode === 'DHT11')) {
+                        indicator.classList.add('has-dht11');
                     }
                 }
 
@@ -548,6 +583,7 @@ async function toggleClock() {
 }
 
 let dht22Pin = null; // Track which pin has the DHT22 component
+let dht11Pin = null; // Track which pin has the DHT11 component
 
 async function configureDHT22OnPin(pin) {
     try {
@@ -656,6 +692,124 @@ async function updateDHT22Display(pin) {
             if (dht22PollInterval) {
                 clearInterval(dht22PollInterval);
                 dht22PollInterval = null;
+            }
+            document.getElementById('dht22-readings').style.display = 'none';
+            document.getElementById('sensor-readings').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error fetching component data:', error);
+    }
+}
+
+// DHT11 Functions
+let dht11PollInterval = null;
+
+async function configureDHT11OnPin(pin) {
+    try {
+        // Check if this pin already has DHT11 - if so, remove it
+        const state = pinStates[pin];
+        if (state && state.component) {
+            // Remove the component
+            const removeResponse = await fetch(`/api/component/${pin}/remove`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const removeData = await removeResponse.json();
+            if (removeData.success) {
+                dht11Pin = null;
+                if (dht11PollInterval) {
+                    clearInterval(dht11PollInterval);
+                    dht11PollInterval = null;
+                }
+                document.getElementById('dht22-readings').style.display = 'none';
+                document.getElementById('sensor-readings').style.display = 'none';
+                await loadPinStates();
+            } else {
+                alert(`Error removing component: ${removeData.error}`);
+            }
+            return;
+        }
+
+        // Assign new DHT11 component
+        const response = await fetch('/api/component/assign', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                pin: pin,
+                component_type: 'dht11',
+                name: `DHT11_${pin}`,
+                gpio_pins: { data: pin },
+                config: { polling: 3, retries: 15 }
+            })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            dht11Pin = pin;
+            await loadPinStates();
+            // Start polling for DHT11 data
+            startDHT11Polling(pin);
+        } else {
+            alert(`Error: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error configuring DHT11:', error);
+        alert('Error configuring DHT11 sensor');
+    }
+}
+
+function startDHT11Polling(pin) {
+    // Show the DHT22 panel (shared with DHT11)
+    document.getElementById('dht22-readings').style.display = 'block';
+    // Update title for DHT11
+    document.querySelector('#dht22-readings h3').textContent = '🌡 DHT11 Sensor';
+
+    // Clear any existing interval
+    if (dht11PollInterval) {
+        clearInterval(dht11PollInterval);
+    }
+
+    // Poll every 2 seconds
+    dht11PollInterval = setInterval(() => updateDHT11Display(pin), 2000);
+    // Update immediately
+    updateDHT11Display(pin);
+}
+
+async function updateDHT11Display(pin) {
+    try {
+        const response = await fetch(`/api/component/${pin}/data`);
+        const data = await response.json();
+
+        if (data.success && data.running) {
+            const componentData = data.data.data || {};
+            const temp = componentData.temperature !== undefined ? componentData.temperature : '--';
+            const humidity = componentData.humidity !== undefined ? componentData.humidity : '--';
+
+            // Update panel
+            document.getElementById('dht22-pin').textContent = pin || '--';
+            document.getElementById('dht22-temp').textContent = temp;
+            document.getElementById('dht22-humidity').textContent = humidity;
+            document.getElementById('dht22-updated').textContent =
+                data.data.last_updated || '--';
+
+            // Update status line
+            const sensorReadings = document.getElementById('sensor-readings');
+            if (temp !== '--' && humidity !== '--') {
+                sensorReadings.innerHTML = ` | 🌡 ${temp}°C 💧 ${humidity}%`;
+                sensorReadings.style.display = 'inline';
+            } else {
+                sensorReadings.style.display = 'none';
+            }
+        } else {
+            // Stop polling if component is not running
+            if (dht11PollInterval) {
+                clearInterval(dht11PollInterval);
+                dht11PollInterval = null;
             }
             document.getElementById('dht22-readings').style.display = 'none';
             document.getElementById('sensor-readings').style.display = 'none';
