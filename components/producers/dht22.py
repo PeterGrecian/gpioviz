@@ -70,22 +70,30 @@ class DHT22Component(ProducerComponent):
             import time
             start_time = time.time()
             print(f"DHT22 '{self.name}': Attempting read on BCM GPIO {self.data_pin}...")
-            humidity, temperature = Adafruit_DHT.read_retry(
-                self.SENSOR_TYPE,
-                self.data_pin,
-                retries=self.retries
-            )
+
+            # Manual retry loop to count attempts
+            humidity, temperature = None, None
+            for attempt in range(1, self.retries + 1):
+                humidity, temperature = Adafruit_DHT.read(
+                    self.SENSOR_TYPE,
+                    self.data_pin
+                )
+                if humidity is not None and temperature is not None:
+                    break
+                if attempt < self.retries:
+                    time.sleep(2)  # Wait before retry
+
             elapsed = time.time() - start_time
 
             if humidity is not None and temperature is not None:
-                print(f"DHT22 '{self.name}': ✓ SUCCESS - {temperature:.1f}°C, {humidity:.1f}% (took {elapsed:.1f}s)")
+                print(f"DHT22 '{self.name}': ✓ SUCCESS - {temperature:.1f}°C, {humidity:.1f}% (attempt {attempt}/{self.retries}, took {elapsed:.1f}s)")
                 logger.debug(f"DHT22 '{self.name}': {temperature:.1f}°C, {humidity:.1f}%")
                 return {
                     'temperature': round(temperature, 1),
                     'humidity': round(humidity, 1)
                 }
             else:
-                print(f"DHT22 '{self.name}': ✗ FAILED - humidity={humidity}, temp={temperature} (took {elapsed:.1f}s)")
+                print(f"DHT22 '{self.name}': ✗ FAILED - all {self.retries} attempts exhausted (took {elapsed:.1f}s)")
                 logger.warning(f"DHT22 '{self.name}': Failed to read sensor")
                 return {
                     'temperature': None,
