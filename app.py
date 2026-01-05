@@ -328,8 +328,12 @@ def track_request():
     """Track each request (user actions only, not polling)"""
     global request_count
     # Only count user actions: page loads, pin changes, mode changes, etc.
-    # Exclude /api/pins (polling) and static files
-    if request.path == '/' or (request.path.startswith('/api/') and request.path != '/api/pins' and request.path != '/api/version'):
+    # Exclude /api/pins (polling), /api/component/*/data (component polling), and static files
+    # Component polling can interfere with timing-sensitive sensors like DHT22
+    if request.path == '/' or (request.path.startswith('/api/')
+                                and request.path != '/api/pins'
+                                and request.path != '/api/version'
+                                and '/component/' not in request.path):
         request_count += 1
         update_status_line()
 
