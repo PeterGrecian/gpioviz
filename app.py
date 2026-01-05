@@ -786,7 +786,8 @@ def remove_component(pin):
 def save_configuration(filename='config.yaml'):
     """Save current pin configuration to YAML file"""
     config = {
-        'pins': {}
+        'pins': {},
+        'components': {}
     }
 
     for pin, state in pin_states.items():
@@ -795,6 +796,18 @@ def save_configuration(filename='config.yaml'):
             'state': state['state'],
             'peripheral_mode': state.get('peripheral_mode', 'GPIO'),
             'flash_speed': state.get('flash_speed', 500)
+        }
+
+    # Save component assignments
+    for pin, component in component_registry.instances.items():
+        component_type = component.__class__.__name__.lower().replace('component', '')
+        # For DHT22, save the BOARD pin number, not BCM
+        gpio_pins = {'data': pin}  # Use BOARD pin number
+        config['components'][pin] = {
+            'type': component_type,
+            'name': component.name,
+            'gpio_pins': gpio_pins,
+            'config': component.config if hasattr(component, 'config') else {}
         }
 
     config_dir = 'configs'
@@ -809,6 +822,7 @@ def save_configuration(filename='config.yaml'):
 
 def load_configuration(filename='config.yaml'):
     """Load pin configuration from YAML file"""
+    global pin_changes
     config_dir = 'configs'
     filepath = os.path.join(config_dir, filename)
 
@@ -823,7 +837,7 @@ def load_configuration(filename='config.yaml'):
         print("Invalid configuration file format")
         return False
 
-    # Apply configuration
+    # Apply pin configuration
     for pin, settings in config['pins'].items():
         pin = int(pin)
         if pin in GPIO_PINS:
@@ -840,6 +854,44 @@ def load_configuration(filename='config.yaml'):
             pin_states[pin]['state'] = settings.get('state', 0)
             pin_states[pin]['peripheral_mode'] = settings.get('peripheral_mode', 'GPIO')
             pin_states[pin]['flash_speed'] = settings.get('flash_speed', 500)
+
+    # Restore component assignments
+    if 'components' in config:
+        for pin, comp_info in config['components'].items():
+            pin = int(pin)
+            if pin not in GPIO_PINS:
+                continue
+
+            component_type = comp_info.get('type')
+            name = comp_info.get('name', f"{component_type}_{pin}")
+            gpio_pins = comp_info.get('gpio_pins', {'data': pin})
+            comp_config = comp_info.get('config', {})
+
+            # Convert data pin from BOARD to BCM for DHT22
+            if component_type == 'dht22':
+                if 'data' in gpio_pins:
+                    board_pin = gpio_pins['data']
+                    bcm_pin = BOARD_TO_BCM.get(board_pin, board_pin)
+                    gpio_pins['data'] = bcm_pin
+                    print(f"DHT22: Converting BOARD pin {board_pin} → BCM GPIO {bcm_pin}")
+
+            # Create and assign component
+            component = component_registry.create_component(component_type, name, gpio_pins, comp_config)
+
+            if component:
+                component_registry.assign_component(pin, component)
+                pin_states[pin]['mode'] = component_type.upper()
+                pin_states[pin]['component'] = True
+                pin_changes += 1
+
+                # Start reading thread for producer components
+                if hasattr(component, 'read'):
+                    component_running[pin] = True
+                    thread = threading.Thread(target=component_read_thread, args=(pin,))
+                    thread.daemon = True
+                    component_threads[pin] = thread
+                    thread.start()
+                    print(f"Started component thread for {component_type} on pin {pin}")
 
     print(f"Configuration loaded from {filepath}")
     return True
