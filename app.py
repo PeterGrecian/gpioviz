@@ -543,12 +543,25 @@ def toggle_peripheral(pin):
 
 @app.route('/api/reset', methods=['POST'])
 def reset_all():
-    """Reset all pins to LOW output"""
-    for pin in GPIO_PINS.keys():
-        # Skip pins with components assigned
-        if pin_states[pin].get('component', False):
-            continue
+    """Reset all pins to LOW output for safety - removes all components"""
+    global pin_changes
 
+    # Stop and remove all components first
+    for pin in list(component_running.keys()):
+        component_running[pin] = False
+        if pin in component_threads:
+            component_threads[pin].join()
+            del component_threads[pin]
+
+    # Remove all components from registry
+    for pin in list(component_registry.instances.keys()):
+        component_registry.remove_component(pin)
+
+    # Clear component data
+    component_data.clear()
+
+    # Reset all GPIO pins
+    for pin in GPIO_PINS.keys():
         # Stop flashing
         if pin_states[pin]['flashing']:
             flashing_pins[pin] = False
@@ -557,10 +570,13 @@ def reset_all():
 
         ensure_pin_setup(pin, 'OUT')
         GPIO.output(pin, GPIO.LOW)
-        # Preserve important fields when resetting
+
+        # Reset pin state
         pin_states[pin]['mode'] = 'OUT'
         pin_states[pin]['state'] = 0
         pin_states[pin]['flashing'] = False
+        pin_states[pin]['component'] = False
+        pin_changes += 1
 
     return jsonify({'success': True})
 
